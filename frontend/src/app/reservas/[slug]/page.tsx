@@ -1,0 +1,498 @@
+'use client'
+
+import type React from 'react'
+import { useState, useEffect } from 'react'
+import { ThemeProvider, useTheme } from '@/context/theme-context'
+import { ThemedCard } from '@/app/components/themed/card'
+import { Booking, TimeSlot } from '@/types'
+import { useProfessionals } from '@/context/professionals-context'
+import { useService } from '@/context/services-context'
+import {
+  ServiceSelection,
+  ProfessionalSelection,
+  DateSelection,
+  TimeSelection,
+  PersonalDataForm,
+  BookingConfirmation,
+  BookingHeader
+} from '@/app/components/booking'
+
+// Datos de ejemplo
+const businessInfo = {
+  bussinessName: 'Centro de Servicios Profesionales',
+  ownerName: 'Marisol'
+}
+
+function BookingContent({ slug }: { slug: string }) {
+  const { currentTheme } = useTheme()
+  const { professionals } = useProfessionals()
+  const { services } = useService()
+  const [step, setStep] = useState(1)
+  const [bookingData, setBookingData] = useState<Booking>({
+    id: '',
+    companyId: '',
+    professionalId: null,
+    date: null,
+    serviceId: '',
+    name: '',
+    email: '',
+    phone: ''
+  })
+  const [availableDates, setAvailableDates] = useState<Date[]>([])
+  const [availableSlots, setAvailableSlots] = useState<TimeSlot[]>([])
+  const [isSubmitted, setIsSubmitted] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const [isLoadingSlots, setIsLoadingSlots] = useState(false)
+  const [companyData, setCompanyData] = useState<any>(null)
+
+  // Obtener datos de la empresa basándose en el slug
+  const fetchCompanyData = async () => {
+    try {
+      const response = await fetch(
+        `http://localhost:3100/api/book/${slug}/data`
+      )
+
+      if (response.ok) {
+        const data = await response.json()
+        setCompanyData(data)
+      } else {
+        console.error(
+          'Error en fetchCompanyData:',
+          response.status,
+          response.statusText
+        )
+        const errorText = await response.text()
+        console.error('Error response text:', errorText)
+      }
+    } catch (error) {
+      console.error('Error al cargar datos de la empresa:', error)
+    }
+  }
+
+  useEffect(() => {
+    fetchCompanyData()
+  }, [slug])
+
+  const fetchAvailableDates = async (professionalId: string | null) => {
+    if (!professionalId) {
+      // Si no hay profesional específico, buscar fechas disponibles para cualquier profesional
+      const res = await fetch(`http://localhost:3100/api/availability/days`)
+      const dates = await res.json()
+      return dates.map((d: string) => new Date(d))
+    }
+
+    const res = await fetch(
+      `http://localhost:3100/api/availability/days/${professionalId}`
+    )
+    const dates = await res.json()
+    return dates.map((d: string) => new Date(d))
+  }
+
+  useEffect(() => {
+    if (bookingData.serviceId) {
+      fetchAvailableDates(bookingData.professionalId).then((dates) => {
+        setAvailableDates(dates)
+      })
+      setBookingData((prev) => ({ ...prev, date: null, time: '' }))
+    }
+  }, [bookingData.professionalId, bookingData.serviceId])
+
+  // Cargar horarios disponibles cuando se selecciona una fecha
+  useEffect(() => {
+    if (bookingData.date) {
+      setIsLoadingSlots(true)
+      fetchAvailableHours(bookingData.professionalId, bookingData.date)
+        .then((slots) => {
+          setAvailableSlots(slots)
+          setIsLoadingSlots(false)
+        })
+        .catch((error) => {
+          console.error('Error al cargar horarios:', error)
+          setAvailableSlots([])
+          setIsLoadingSlots(false)
+        })
+    }
+  }, [bookingData.date, bookingData.professionalId])
+
+  // Generar horarios disponibles
+  const fetchAvailableHours = async (
+    professionalId: string | null,
+    date: Date
+  ) => {
+    if (!date) return []
+
+    const dateStr = date.toISOString().split('T')[0]
+
+    if (!professionalId) {
+      // Si no hay profesional específico, buscar horarios disponibles para cualquier profesional
+      try {
+        const res = await fetch(
+          `http://localhost:3100/api/availability/hours?date=${dateStr}`
+        )
+
+        if (!res.ok) {
+          const errorText = await res.text()
+          console.error('Error en API:', errorText)
+
+          // Si no hay horarios configurados, mostrar horarios por defecto para testing
+          if (res.status === 404) {
+            const defaultTimes = [
+              '09:00',
+              '09:30',
+              '10:00',
+              '10:30',
+              '11:00',
+              '11:30',
+              '12:00',
+              '12:30',
+              '13:00',
+              '13:30',
+              '14:00',
+              '14:30',
+              '15:00',
+              '15:30',
+              '16:00',
+              '16:30',
+              '17:00',
+              '17:30'
+            ]
+            return defaultTimes.map((time: string) => ({
+              time,
+              available: true,
+              professionalId: undefined
+            }))
+          }
+
+          return []
+        }
+
+        const times = await res.json()
+        return times.map((time: string) => ({
+          time,
+          available: true,
+          professionalId: undefined
+        }))
+      } catch (error) {
+        console.error(
+          'Error al obtener horarios para cualquier profesional:',
+          error
+        )
+
+        // En caso de error, mostrar horarios por defecto para testing
+        const defaultTimes = [
+          '09:00',
+          '09:30',
+          '10:00',
+          '10:30',
+          '11:00',
+          '11:30',
+          '12:00',
+          '12:30',
+          '13:00',
+          '13:30',
+          '14:00',
+          '14:30',
+          '15:00',
+          '15:30',
+          '16:00',
+          '16:30',
+          '17:00',
+          '17:30'
+        ]
+        return defaultTimes.map((time: string) => ({
+          time,
+          available: true,
+          professionalId: undefined
+        }))
+      }
+    }
+
+    try {
+      const res = await fetch(
+        `http://localhost:3100/api/availability/hours/${professionalId}?date=${dateStr}`
+      )
+
+      if (!res.ok) {
+        const errorText = await res.text()
+        console.error('Error en API:', errorText)
+        return []
+      }
+
+      const times = await res.json()
+
+      return times.map((time: string) => ({
+        time,
+        available: true,
+        professionalId: professionalId || undefined
+      }))
+    } catch (error) {
+      console.error(
+        'Error al obtener horarios para profesional específico:',
+        error
+      )
+      return []
+    }
+  }
+
+  const fetchAvailableProfessional = async (date: Date, time: string) => {
+    const dateStr = date.toISOString().split('T')[0]
+    const res = await fetch(
+      `http://localhost:3100/api/availability/professionals?date=${dateStr}&time=${time}`
+    )
+    return await res.json()
+  }
+
+  const handleServiceSelect = (serviceId: string) => {
+    setBookingData((prev) => ({ ...prev, serviceId }))
+  }
+
+  const handleProfessionalSelect = (professionalId: string | null) => {
+    setBookingData((prev) => ({ ...prev, professionalId }))
+  }
+
+  const handleDateSelect = (date: Date) => {
+    setBookingData((prev) => ({ ...prev, date }))
+  }
+
+  const handleTimeSelect = async (time: string) => {
+    if (!bookingData.date) return
+
+    // Si no hay profesional seleccionado, buscar uno disponible
+    if (!bookingData.professionalId) {
+      const availableProfessionals = await fetchAvailableProfessional(
+        bookingData.date,
+        time
+      )
+      // No asignamos automáticamente un profesional si el usuario eligió "cualquier profesional"
+      // El backend se encargará de asignar uno disponible
+    }
+
+    // Combine date and time into a single Date object
+    const [hours, minutes] = time.split(':').map(Number)
+    const combinedDate = new Date(bookingData.date)
+    combinedDate.setHours(hours, minutes, 0, 0)
+
+    setBookingData((prev) => ({ ...prev, date: combinedDate }))
+  }
+
+  const handleInputChange = (field: string, value: string) => {
+    setBookingData((prev) => ({ ...prev, [field]: value }))
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setIsLoading(true)
+
+    try {
+      if (!companyData) {
+        throw new Error('No se han cargado los datos de la empresa')
+      }
+
+      const companyId = companyData.company.id
+
+      // Si no hay profesional seleccionado, usar createBookingAuto
+      if (!bookingData.professionalId) {
+        const requestBody = {
+          companyId,
+          serviceId: bookingData.serviceId,
+          name: bookingData.name,
+          email: bookingData.email,
+          phone: bookingData.phone,
+          date: bookingData.date?.toISOString()
+        }
+
+        const response = await fetch(
+          'http://localhost:3100/api/bookings/auto',
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(requestBody)
+          }
+        )
+
+        if (!response.ok) {
+          const errorText = await response.text()
+          console.error('Error response:', errorText)
+          throw new Error(
+            `Error al crear la reserva automática: ${response.status} ${response.statusText}`
+          )
+        }
+
+        const booking = await response.json()
+      } else {
+        // Usar createBooking con profesional específico
+        const requestBody = {
+          professionalId: bookingData.professionalId,
+          serviceId: bookingData.serviceId,
+          name: bookingData.name,
+          email: bookingData.email,
+          phone: bookingData.phone,
+          date: bookingData.date?.toISOString()
+        }
+
+        const response = await fetch(
+          `http://localhost:3100/api/bookings/${companyId}`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(requestBody)
+          }
+        )
+
+        if (!response.ok) {
+          const errorText = await response.text()
+          console.error('Error response:', errorText)
+          throw new Error(
+            `Error al crear la reserva: ${response.status} ${response.statusText}`
+          )
+        }
+
+        const booking = await response.json()
+      }
+
+      setIsLoading(false)
+      setIsSubmitted(true)
+    } catch (error) {
+      console.error('Error al crear la reserva:', error)
+      setIsLoading(false)
+      // Aquí podrías mostrar un mensaje de error al usuario
+      alert(
+        `Error al crear la reserva: ${
+          error instanceof Error ? error.message : 'Error desconocido'
+        }`
+      )
+    }
+  }
+
+  const getSelectedService = () =>
+    services.find((s) => s.id === bookingData.serviceId)
+  const getSelectedProfessional = () => {
+    if (!bookingData.professionalId) return null
+    return professionals.find((p) => p.id === bookingData.professionalId)
+  }
+
+  const handleNewBooking = () => {
+    window.location.reload()
+  }
+
+  if (isSubmitted) {
+    return (
+      <div
+        className="min-h-screen p-4"
+        style={{ background: currentTheme.gradients.background }}
+      >
+        <div className="max-w-2xl mx-auto pt-20">
+          <ThemedCard>
+            <BookingConfirmation
+              bookingData={bookingData}
+              selectedService={getSelectedService()}
+              selectedProfessional={getSelectedProfessional()}
+              onNewBooking={handleNewBooking}
+              currentTheme={currentTheme}
+            />
+          </ThemedCard>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div
+      className="min-h-screen"
+      style={{ background: currentTheme.gradients.background }}
+    >
+      <BookingHeader
+        currentStep={step}
+        businessInfo={businessInfo}
+        currentTheme={currentTheme}
+      />
+
+      <div className="max-w-4xl mx-auto p-4 py-6">
+        <ThemedCard className="p-6 sm:p-8">
+          {/* Step 1: Seleccionar Servicio */}
+          {step === 1 && (
+            <ServiceSelection
+              services={services}
+              selectedServiceId={bookingData.serviceId}
+              onServiceSelect={handleServiceSelect}
+              onContinue={() => setStep(2)}
+              currentTheme={currentTheme}
+            />
+          )}
+
+          {/* Step 2: Seleccionar Profesional */}
+          {step === 2 && (
+            <ProfessionalSelection
+              professionals={professionals}
+              selectedProfessionalId={bookingData.professionalId}
+              onProfessionalSelect={handleProfessionalSelect}
+              onBack={() => setStep(1)}
+              onContinue={() => setStep(3)}
+              currentTheme={currentTheme}
+            />
+          )}
+
+          {/* Step 3: Seleccionar Fecha */}
+          {step === 3 && (
+            <DateSelection
+              availableDates={availableDates}
+              selectedDate={bookingData.date}
+              selectedProfessional={getSelectedProfessional()}
+              onDateSelect={handleDateSelect}
+              onBack={() => setStep(2)}
+              onContinue={() => setStep(4)}
+              currentTheme={currentTheme}
+            />
+          )}
+
+          {/* Step 4: Seleccionar Hora */}
+          {step === 4 && (
+            <TimeSelection
+              availableSlots={availableSlots}
+              selectedDate={bookingData.date}
+              selectedProfessionalId={bookingData.professionalId}
+              isLoadingSlots={isLoadingSlots}
+              onTimeSelect={handleTimeSelect}
+              onBack={() => setStep(3)}
+              onContinue={() => setStep(5)}
+              onBackToDate={() => setStep(3)}
+              onBackToProfessional={() => setStep(2)}
+              currentTheme={currentTheme}
+            />
+          )}
+
+          {/* Step 5: Datos Personales */}
+          {step === 5 && (
+            <PersonalDataForm
+              bookingData={bookingData}
+              selectedService={getSelectedService()}
+              selectedProfessional={getSelectedProfessional()}
+              isLoading={isLoading}
+              onInputChange={handleInputChange}
+              onSubmit={handleSubmit}
+              onBack={() => setStep(4)}
+              currentTheme={currentTheme}
+            />
+          )}
+        </ThemedCard>
+      </div>
+    </div>
+  )
+}
+
+export default async function BookingPage({
+  params
+}: {
+  params: Promise<{ slug: string }>
+}) {
+  const resolvedParams = await params
+  return (
+    <ThemeProvider>
+      <BookingContent slug={resolvedParams.slug} />
+    </ThemeProvider>
+  )
+}

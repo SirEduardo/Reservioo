@@ -1,0 +1,111 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Company {
+  id           String        @id @default(uuid())
+  ownerName    String
+  email        String        @unique
+  password     String
+  phone        String
+  businessName String
+  businessType String
+  slug         String        @unique
+  createdAt    DateTime      @default(now())
+
+  professionals Professional[]
+  services      Service[]
+  schedules     Schedule[]
+  bookings      Booking[]
+  settings      Settings?
+}
+
+model Schedule {
+  id             String       @id @default(uuid())
+  dayOfWeek      Int          // 0 = Sunday, 6 = Saturday
+  startTime      String       // e.g., "09:00"
+  endTime        String       // e.g., "17:00"
+  companyId      String
+
+  company      Company      @relation(fields: [companyId], references: [id])
+  professionals ScheduleProfessional[]
+}
+
+model ScheduleProfessional {
+  scheduleId      String
+  professionalId  String
+
+  schedule      Schedule      @relation(fields: [scheduleId], references: [id])
+  professional  Professional  @relation(fields: [professionalId], references: [id])
+
+  @@id([scheduleId, professionalId])
+}
+
+model Booking {
+  id             String       @id @default(uuid())
+  companyId      String
+  professionalId String
+  serviceId      String
+  name           String
+  email          String
+  phone          String
+  date           DateTime
+
+  company      Company      @relation(fields: [companyId], references: [id])
+  professional Professional @relation(fields: [professionalId], references: [id])
+  service      Service      @relation(fields: [serviceId], references: [id])
+}
+
+model Service {
+  id             String        @id @default(uuid())
+  name           String
+  duration       Int           // e.g., 40 minutes
+  price          Float         
+  companyId      String
+
+  company        Company       @relation(fields: [companyId], references: [id])
+  bookings       Booking[]
+  professionalServices ProfessionalServices[]
+}
+
+model Professional {
+  id         String       @id @default(uuid())
+  name       String
+  companyId  String
+
+  company     Company      @relation(fields: [companyId], references: [id])
+  schedules   ScheduleProfessional[]
+  bookings    Booking[]
+  professionalServices ProfessionalServices[]
+}
+
+model ProfessionalServices {
+  professionalId String
+  serviceId      String
+
+  professional   Professional @relation(fields: [professionalId], references: [id])
+  service        Service      @relation(fields: [serviceId], references: [id])
+
+  @@id([professionalId, serviceId])
+}
+
+model Settings {
+  id            String   @id @default(uuid())
+  companyId     String   @unique
+  appointmentDuration Int // e.g., 30 minutes
+  appointmentBuffer   Int // e.g., 10 minutes (optional)
+
+  company Company @relation(fields: [companyId], references: [id])
+}
