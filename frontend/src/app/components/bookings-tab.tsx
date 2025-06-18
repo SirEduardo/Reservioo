@@ -8,6 +8,7 @@ import { Booking, Professional, Service } from '@/types'
 import { useProfessionals } from '@/context/professionals-context'
 import { useService } from '@/context/services-context'
 import { useDashboard } from '@/context/dashboard-Context'
+import { apiUrl } from '@/app/api/apiUrl'
 
 interface BookingTabProps {
   bookings: Booking[]
@@ -42,15 +43,12 @@ export default function BookingTab({
       setLoading(true)
       setError(null)
 
-      const response = await fetch(
-        `http://localhost:3100/api/bookings/${companyId}`,
-        {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json'
-          }
+      const response = await fetch(`${apiUrl}/bookings/${companyId}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
         }
-      )
+      })
 
       if (!response.ok) {
         throw new Error(`Error al cargar reservas: ${response.status}`)
@@ -83,15 +81,12 @@ export default function BookingTab({
     try {
       setDeletingBooking(bookingId)
 
-      const response = await fetch(
-        `http://localhost:3100/api/bookings/${bookingId}`,
-        {
-          method: 'DELETE',
-          headers: {
-            'Content-Type': 'application/json'
-          }
+      const response = await fetch(`${apiUrl}/bookings/${bookingId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json'
         }
-      )
+      })
 
       if (!response.ok) {
         throw new Error(`Error al eliminar reserva: ${response.status}`)

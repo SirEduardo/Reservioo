@@ -16,6 +16,7 @@ import {
   BookingConfirmation,
   BookingHeader
 } from '@/app/components/booking'
+import { apiUrl } from '@/app/api/apiUrl'
 
 // Datos de ejemplo
 const businessInfo = {
@@ -48,9 +49,7 @@ function BookingContent({ slug }: { slug: string }) {
   // Obtener datos de la empresa basándose en el slug
   const fetchCompanyData = async () => {
     try {
-      const response = await fetch(
-        `http://localhost:3100/api/book/${slug}/data`
-      )
+      const response = await fetch(`${apiUrl}/book/${slug}/data`)
 
       if (response.ok) {
         const data = await response.json()
@@ -76,14 +75,12 @@ function BookingContent({ slug }: { slug: string }) {
   const fetchAvailableDates = async (professionalId: string | null) => {
     if (!professionalId) {
       // Si no hay profesional específico, buscar fechas disponibles para cualquier profesional
-      const res = await fetch(`http://localhost:3100/api/availability/days`)
+      const res = await fetch(`${apiUrl}/availability/days`)
       const dates = await res.json()
       return dates.map((d: string) => new Date(d))
     }
 
-    const res = await fetch(
-      `http://localhost:3100/api/availability/days/${professionalId}`
-    )
+    const res = await fetch(`${apiUrl}/availability/days/${professionalId}`)
     const dates = await res.json()
     return dates.map((d: string) => new Date(d))
   }
@@ -126,9 +123,7 @@ function BookingContent({ slug }: { slug: string }) {
     if (!professionalId) {
       // Si no hay profesional específico, buscar horarios disponibles para cualquier profesional
       try {
-        const res = await fetch(
-          `http://localhost:3100/api/availability/hours?date=${dateStr}`
-        )
+        const res = await fetch(`${apiUrl}/availability/hours?date=${dateStr}`)
 
         if (!res.ok) {
           const errorText = await res.text()
@@ -209,7 +204,7 @@ function BookingContent({ slug }: { slug: string }) {
 
     try {
       const res = await fetch(
-        `http://localhost:3100/api/availability/hours/${professionalId}?date=${dateStr}`
+        `${apiUrl}/availability/hours/${professionalId}?date=${dateStr}`
       )
 
       if (!res.ok) {
@@ -237,7 +232,7 @@ function BookingContent({ slug }: { slug: string }) {
   const fetchAvailableProfessional = async (date: Date, time: string) => {
     const dateStr = date.toISOString().split('T')[0]
     const res = await fetch(
-      `http://localhost:3100/api/availability/professionals?date=${dateStr}&time=${time}`
+      `${apiUrl}/availability/professionals?date=${dateStr}&time=${time}`
     )
     return await res.json()
   }
@@ -301,16 +296,13 @@ function BookingContent({ slug }: { slug: string }) {
           date: bookingData.date?.toISOString()
         }
 
-        const response = await fetch(
-          'http://localhost:3100/api/bookings/auto',
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(requestBody)
-          }
-        )
+        const response = await fetch(`${apiUrl}/bookings/auto`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(requestBody)
+        })
 
         if (!response.ok) {
           const errorText = await response.text()
@@ -332,16 +324,13 @@ function BookingContent({ slug }: { slug: string }) {
           date: bookingData.date?.toISOString()
         }
 
-        const response = await fetch(
-          `http://localhost:3100/api/bookings/${companyId}`,
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(requestBody)
-          }
-        )
+        const response = await fetch(`${apiUrl}/bookings/${companyId}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(requestBody)
+        })
 
         if (!response.ok) {
           const errorText = await response.text()

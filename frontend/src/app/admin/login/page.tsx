@@ -1,44 +1,44 @@
-"use client"
-import { useRouter } from "next/navigation"
-import type React from "react"
-import { useState } from "react"
+'use client'
+import { apiUrl } from '@/app/api/apiUrl'
+import { useRouter } from 'next/navigation'
+import type React from 'react'
+import { useState } from 'react'
 
 export default function AdminLoginPage() {
   const router = useRouter()
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [error, setError] = useState("")
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
-    setError("")
+    setError('')
 
     try {
-      const response = await fetch("http://localhost:3100/api/auth/login", {
-        method: "POST",
+      const response = await fetch(`${apiUrl}/auth/login`, {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json"
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({ email, password })
       })
 
-
-      if(!response.ok) {
+      if (!response.ok) {
         const errorData = await response.json()
-        setError(errorData.message || "Error al iniciar sesión")
-        setIsLoading(false);
+        setError(errorData.message || 'Error al iniciar sesión')
+        setIsLoading(false)
         return
       }
       const data = await response.json()
-      console.log(data);
-      localStorage.setItem("companyId", data.admin.id)
-      localStorage.setItem("token", data.token)
-      router.push("/dashboard")
+      console.log(data)
+      localStorage.setItem('companyId', data.admin.id)
+      localStorage.setItem('token', data.token)
+      router.push('/dashboard')
     } catch (error) {
-      setError("Error al conectar con el servidor")
+      setError('Error al conectar con el servidor')
     } finally {
       setIsLoading(false)
     }
@@ -50,7 +50,12 @@ export default function AdminLoginPage() {
         {/* Logo/Header */}
         <div className="text-center mb-8">
           <div className="bg-white rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 shadow-lg">
-            <svg className="h-8 w-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg
+              className="h-8 w-8 text-blue-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -67,14 +72,26 @@ export default function AdminLoginPage() {
         <div className="bg-white rounded-xl shadow-xl border-0 overflow-hidden">
           <div className="p-8">
             <div className="text-center mb-6">
-              <h2 className="text-2xl font-semibold text-gray-900 mb-2">Iniciar sesión</h2>
-              <p className="text-gray-600">Accede a tu panel de control empresarial</p>
+              <h2 className="text-2xl font-semibold text-gray-900 mb-2">
+                Iniciar sesión
+              </h2>
+              <p className="text-gray-600">
+                Accede a tu panel de control empresarial
+              </p>
             </div>
 
             <form onSubmit={handleLogin} className="space-y-6">
               <div className="space-y-2">
-                <label htmlFor="email" className="text-sm font-medium text-gray-700 flex items-center gap-2">
-                  <svg className="h-4 w-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <label
+                  htmlFor="email"
+                  className="text-sm font-medium text-gray-700 flex items-center gap-2"
+                >
+                  <svg
+                    className="h-4 w-4 text-gray-500"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
@@ -96,8 +113,16 @@ export default function AdminLoginPage() {
               </div>
 
               <div className="space-y-2">
-                <label htmlFor="password" className="text-sm font-medium text-gray-700 flex items-center gap-2">
-                  <svg className="h-4 w-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <label
+                  htmlFor="password"
+                  className="text-sm font-medium text-gray-700 flex items-center gap-2"
+                >
+                  <svg
+                    className="h-4 w-4 text-gray-500"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
@@ -110,7 +135,7 @@ export default function AdminLoginPage() {
                 <div className="relative">
                   <input
                     id="password"
-                    type={showPassword ? "text" : "password"}
+                    type={showPassword ? 'text' : 'password'}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
@@ -123,7 +148,12 @@ export default function AdminLoginPage() {
                     className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
                   >
                     {showPassword ? (
-                      <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg
+                        className="h-5 w-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
                         <path
                           strokeLinecap="round"
                           strokeLinejoin="round"
@@ -132,7 +162,12 @@ export default function AdminLoginPage() {
                         />
                       </svg>
                     ) : (
-                      <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg
+                        className="h-5 w-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
                         <path
                           strokeLinecap="round"
                           strokeLinejoin="round"
@@ -175,13 +210,17 @@ export default function AdminLoginPage() {
                 disabled={isLoading}
                 className={`w-full py-3 px-4 rounded-lg font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
                   isLoading
-                    ? "bg-gray-400 text-gray-200 cursor-not-allowed"
-                    : "bg-blue-600 text-white hover:bg-blue-700"
+                    ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
+                    : 'bg-blue-600 text-white hover:bg-blue-700'
                 }`}
               >
                 {isLoading ? (
                   <div className="flex items-center justify-center gap-2">
-                    <svg className="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
+                    <svg
+                      className="animate-spin h-5 w-5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
                       <circle
                         className="opacity-25"
                         cx="12"
@@ -199,18 +238,19 @@ export default function AdminLoginPage() {
                     Iniciando sesión...
                   </div>
                 ) : (
-                  "Iniciar sesión"
+                  'Iniciar sesión'
                 )}
               </button>
             </form>
-
           </div>
 
           {/* Footer */}
           <div className="bg-gray-50 px-8 py-4 border-t border-gray-100">
             <div className="flex items-center justify-between text-sm text-gray-600">
               <span>¿Olvidaste tu contraseña?</span>
-              <button className="text-blue-600 hover:text-blue-800 font-medium">Recuperar</button>
+              <button className="text-blue-600 hover:text-blue-800 font-medium">
+                Recuperar
+              </button>
             </div>
           </div>
         </div>
@@ -218,9 +258,13 @@ export default function AdminLoginPage() {
         {/* Additional info */}
         <div className="text-center mt-6">
           <p className="text-sm text-gray-600">
-            ¿No tienes cuenta?{" "}
-            
-            <button onClick={() => router.push("/admin/register")} className="text-blue-600 hover:text-blue-800 font-medium">Regístrate aquí</button>
+            ¿No tienes cuenta?{' '}
+            <button
+              onClick={() => router.push('/admin/register')}
+              className="text-blue-600 hover:text-blue-800 font-medium"
+            >
+              Regístrate aquí
+            </button>
           </p>
         </div>
       </div>

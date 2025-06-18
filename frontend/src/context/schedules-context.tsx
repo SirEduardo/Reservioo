@@ -9,6 +9,7 @@ import {
 } from 'react'
 import { useDashboard } from './dashboard-Context'
 import { Schedule, ScheduleProfessional } from '@/types'
+import { apiUrl } from '@/app/api/apiUrl'
 
 type SchedulesContextProps = {
   addSchedule: (formData: {
@@ -51,12 +52,9 @@ export const ScheduleProvider = ({ children }: { children: ReactNode }) => {
     setLoading(true)
     try {
       if (!companyId) return
-      const response = await fetch(
-        `http://localhost:3100/api/schedules/${companyId}`,
-        {
-          method: 'GET'
-        }
-      )
+      const response = await fetch(`${apiUrl}/schedules/${companyId}`, {
+        method: 'GET'
+      })
       const data = await response.json()
       setSchedules(data)
       console.log(data)
@@ -73,16 +71,13 @@ export const ScheduleProvider = ({ children }: { children: ReactNode }) => {
     endTime: string
   }) => {
     try {
-      const res = await fetch(
-        `http://localhost:3100/api/schedules/weekly/${companyId}`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(formData)
-        }
-      )
+      const res = await fetch(`${apiUrl}/schedules/weekly/${companyId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(formData)
+      })
       const data = await res.json()
       console.log(data)
 
@@ -94,12 +89,9 @@ export const ScheduleProvider = ({ children }: { children: ReactNode }) => {
 
   const deleteSchedule = async (scheduleId: string) => {
     try {
-      const res = await fetch(
-        `http://localhost:3100/api/schedules/${scheduleId}`,
-        {
-          method: 'DELETE'
-        }
-      )
+      const res = await fetch(`${apiUrl}/schedules/${scheduleId}`, {
+        method: 'DELETE'
+      })
       const data = await res.json()
       console.log('Schedule deleted', data)
 
@@ -112,9 +104,7 @@ export const ScheduleProvider = ({ children }: { children: ReactNode }) => {
   }
   const fetchProfessionalSchedules = async () => {
     try {
-      const res = await fetch(
-        `http://localhost:3100/api/schedules/assignments/${companyId}`
-      )
+      const res = await fetch(`${apiUrl}/schedules/assignments/${companyId}`)
       const data = await res.json()
       setScheduleProfessionals(data)
     } catch (err) {
@@ -132,7 +122,7 @@ export const ScheduleProvider = ({ children }: { children: ReactNode }) => {
     )
     try {
       if (alreadyAssigned) {
-        await fetch(`http://localhost:3100/api/schedules/assignment`, {
+        await fetch(`${apiUrl}/schedules/assignment`, {
           method: 'DELETE',
           headers: {
             'Content-Type': 'application/json'
@@ -149,7 +139,7 @@ export const ScheduleProvider = ({ children }: { children: ReactNode }) => {
           )
         )
       } else {
-        await fetch(`http://localhost:3100/api/schedules/assignment`, {
+        await fetch(`${apiUrl}/schedules/assignment`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'

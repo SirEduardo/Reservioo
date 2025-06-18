@@ -9,6 +9,7 @@ import {
   useState
 } from 'react'
 import { useDashboard } from './dashboard-Context'
+import { apiUrl } from '@/app/api/apiUrl'
 
 type ServiceContextType = {
   handleAddService: (data: {
@@ -52,12 +53,9 @@ export const ServiceProvider = ({ children }: { children: ReactNode }) => {
     setLoading(true)
     try {
       if (!companyId) return
-      const response = await fetch(
-        `http://localhost:3100/api/services/${companyId}`,
-        {
-          method: 'GET'
-        }
-      )
+      const response = await fetch(`${apiUrl}/services/${companyId}`, {
+        method: 'GET'
+      })
       const data = await response.json()
       setServices(data)
       console.log(data)
@@ -74,16 +72,13 @@ export const ServiceProvider = ({ children }: { children: ReactNode }) => {
     price: number
   }) => {
     try {
-      const res = await fetch(
-        `http://localhost:3100/api/services/${companyId}`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(serviceData)
-        }
-      )
+      const res = await fetch(`${apiUrl}/services/${companyId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(serviceData)
+      })
       const data = await res.json()
       setServices((services) => [...services, data])
     } catch (error) {
@@ -93,12 +88,9 @@ export const ServiceProvider = ({ children }: { children: ReactNode }) => {
 
   const handleDeleteService = async (serviceId: string) => {
     try {
-      const res = await fetch(
-        `http://localhost:3100/api/services/${serviceId}`,
-        {
-          method: 'DELETE'
-        }
-      )
+      const res = await fetch(`${apiUrl}/services/${serviceId}`, {
+        method: 'DELETE'
+      })
       if (!res.ok) {
         throw new Error(`Failed to delete service: ${res.statusText}`)
       }
@@ -115,9 +107,7 @@ export const ServiceProvider = ({ children }: { children: ReactNode }) => {
 
   const fetchProfessionalServices = async () => {
     try {
-      const res = await fetch(
-        `http://localhost:3100/api/services/assignments/${companyId}`
-      )
+      const res = await fetch(`${apiUrl}/services/assignments/${companyId}`)
       const data = await res.json()
       setProfessionalServices(data)
     } catch (err) {
@@ -135,7 +125,7 @@ export const ServiceProvider = ({ children }: { children: ReactNode }) => {
 
     try {
       if (alreadyAssigned) {
-        await fetch(`http://localhost:3100/api/services/assignment`, {
+        await fetch(`${apiUrl}/services/assignment`, {
           method: 'DELETE',
           headers: {
             'Content-Type': 'application/json'
@@ -152,7 +142,7 @@ export const ServiceProvider = ({ children }: { children: ReactNode }) => {
           )
         )
       } else {
-        await fetch(`http://localhost:3100/api/services/assignment`, {
+        await fetch(`${apiUrl}/services/assignment`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'

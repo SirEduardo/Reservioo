@@ -1,20 +1,21 @@
-"use client"
-import { useRouter } from "next/navigation"
-import type React from "react"
-import { useState } from "react"
-import AdminLoginPage from "../login/page"
+'use client'
+import { useRouter } from 'next/navigation'
+import type React from 'react'
+import { useState } from 'react'
+import AdminLoginPage from '../login/page'
+import { apiUrl } from '@/app/api/apiUrl'
 
 export default function AdminRegisterPage() {
   const router = useRouter()
   const [formData, setFormData] = useState({
-    businessName: "",
-    ownerName: "",
-    email: "",
-    phone: "",
-    password: "",
-    confirmPassword: "",
-    businessType: "",
-    acceptTerms: false,
+    businessName: '',
+    ownerName: '',
+    email: '',
+    phone: '',
+    password: '',
+    confirmPassword: '',
+    businessType: '',
+    acceptTerms: false
   })
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [isLoading, setIsLoading] = useState(false)
@@ -23,31 +24,31 @@ export default function AdminRegisterPage() {
   const [step, setStep] = useState(1)
 
   const businessTypes = [
-    "Consultoría",
-    "Salud y Bienestar",
-    "Belleza y Estética",
-    "Educación",
-    "Servicios Profesionales",
-    "Fitness y Deporte",
-    "Otro",
+    'Consultoría',
+    'Salud y Bienestar',
+    'Belleza y Estética',
+    'Educación',
+    'Servicios Profesionales',
+    'Fitness y Deporte',
+    'Otro'
   ]
 
   const validateStep1 = () => {
     const newErrors: Record<string, string> = {}
 
     if (!formData.businessName.trim()) {
-      newErrors.businessName = "El nombre del negocio es requerido"
+      newErrors.businessName = 'El nombre del negocio es requerido'
     }
     if (!formData.ownerName.trim()) {
-      newErrors.ownerName = "Tu nombre es requerido"
+      newErrors.ownerName = 'Tu nombre es requerido'
     }
     if (!formData.email.trim()) {
-      newErrors.email = "El email es requerido"
+      newErrors.email = 'El email es requerido'
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = "El email no es válido"
+      newErrors.email = 'El email no es válido'
     }
     if (!formData.phone.trim()) {
-      newErrors.phone = "El teléfono es requerido"
+      newErrors.phone = 'El teléfono es requerido'
     }
 
     setErrors(newErrors)
@@ -58,35 +59,38 @@ export default function AdminRegisterPage() {
     const newErrors: Record<string, string> = {}
 
     if (!formData.password) {
-      newErrors.password = "La contraseña es requerida"
+      newErrors.password = 'La contraseña es requerida'
     } else if (formData.password.length < 6) {
-      newErrors.password = "La contraseña debe tener al menos 6 caracteres"
+      newErrors.password = 'La contraseña debe tener al menos 6 caracteres'
     }
     if (!formData.confirmPassword) {
-      newErrors.confirmPassword = "Confirma tu contraseña"
+      newErrors.confirmPassword = 'Confirma tu contraseña'
     } else if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = "Las contraseñas no coinciden"
+      newErrors.confirmPassword = 'Las contraseñas no coinciden'
     }
     if (!formData.businessType) {
-      newErrors.businessType = "Selecciona el tipo de negocio"
+      newErrors.businessType = 'Selecciona el tipo de negocio'
     }
     if (!formData.acceptTerms) {
-      newErrors.acceptTerms = "Debes aceptar los términos y condiciones"
+      newErrors.acceptTerms = 'Debes aceptar los términos y condiciones'
     }
 
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     const { name, value, type } = e.target
     setFormData((prev) => ({
       ...prev,
-      [name]: type === "checkbox" ? (e.target as HTMLInputElement).checked : value,
+      [name]:
+        type === 'checkbox' ? (e.target as HTMLInputElement).checked : value
     }))
     // Limpiar error del campo cuando el usuario empiece a escribir
     if (errors[name]) {
-      setErrors((prev) => ({ ...prev, [name]: "" }))
+      setErrors((prev) => ({ ...prev, [name]: '' }))
     }
   }
 
@@ -107,25 +111,25 @@ export default function AdminRegisterPage() {
     setIsLoading(true)
 
     try {
-      const res = await fetch("http://localhost:3100/api/auth/register", {
-        method: "POST",
+      const res = await fetch(`${apiUrl}/auth/register`, {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json"
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify(formData)
       })
-      if (!res.ok){
+      if (!res.ok) {
         const errorData = await res.json()
-        setErrors({ form: errorData.message || "Error en el registro" })
+        setErrors({ form: errorData.message || 'Error en el registro' })
         setIsLoading(false)
         return
       }
       const data = await res.json()
-      console.log('Registro existoso', data);
-      localStorage.setItem("token", data.token)
-      router.push("/dashboard")
+      console.log('Registro existoso', data)
+      localStorage.setItem('token', data.token)
+      router.push('/dashboard')
     } catch (error) {
-      setErrors({ form: "Error de conexión con el servidor" })
+      setErrors({ form: 'Error de conexión con el servidor' })
     } finally {
       setIsLoading(false)
     }
@@ -137,7 +141,12 @@ export default function AdminRegisterPage() {
         {/* Logo/Header */}
         <div className="text-center mb-8">
           <div className="bg-white rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 shadow-lg">
-            <svg className="h-8 w-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg
+              className="h-8 w-8 text-blue-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -156,7 +165,9 @@ export default function AdminRegisterPage() {
             <div className="flex items-center">
               <div
                 className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-                  step >= 1 ? "bg-blue-600 text-white" : "bg-gray-300 text-gray-600"
+                  step >= 1
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-gray-300 text-gray-600'
                 }`}
               >
                 1
@@ -164,13 +175,15 @@ export default function AdminRegisterPage() {
               <div className="w-16 h-1 mx-2 bg-gray-300">
                 <div
                   className={`h-full transition-all duration-300 ${
-                    step >= 2 ? "bg-blue-600 w-full" : "bg-gray-300 w-0"
+                    step >= 2 ? 'bg-blue-600 w-full' : 'bg-gray-300 w-0'
                   }`}
                 ></div>
               </div>
               <div
                 className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-                  step >= 2 ? "bg-blue-600 text-white" : "bg-gray-300 text-gray-600"
+                  step >= 2
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-gray-300 text-gray-600'
                 }`}
               >
                 2
@@ -188,10 +201,14 @@ export default function AdminRegisterPage() {
           <div className="p-8">
             <div className="text-center mb-6">
               <h2 className="text-2xl font-semibold text-gray-900 mb-2">
-                {step === 1 ? "Información del negocio" : "Configuración de cuenta"}
+                {step === 1
+                  ? 'Información del negocio'
+                  : 'Configuración de cuenta'}
               </h2>
               <p className="text-gray-600">
-                {step === 1 ? "Cuéntanos sobre tu negocio" : "Configura tu acceso y preferencias"}
+                {step === 1
+                  ? 'Cuéntanos sobre tu negocio'
+                  : 'Configura tu acceso y preferencias'}
               </p>
             </div>
 
@@ -209,8 +226,16 @@ export default function AdminRegisterPage() {
               {step === 1 && (
                 <>
                   <div className="space-y-2">
-                    <label htmlFor="businessName" className="text-sm font-medium text-gray-700 flex items-center gap-2">
-                      <svg className="h-4 w-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <label
+                      htmlFor="businessName"
+                      className="text-sm font-medium text-gray-700 flex items-center gap-2"
+                    >
+                      <svg
+                        className="h-4 w-4 text-gray-500"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
                         <path
                           strokeLinecap="round"
                           strokeLinejoin="round"
@@ -229,16 +254,28 @@ export default function AdminRegisterPage() {
                       placeholder="Ej: Clínica Dental Sonrisa"
                       className={`text-gray-800 w-full px-3 py-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${
                         errors.businessName
-                          ? "border-red-300 focus:border-red-500"
-                          : "border-gray-300 focus:border-blue-500"
+                          ? 'border-red-300 focus:border-red-500'
+                          : 'border-gray-300 focus:border-blue-500'
                       }`}
                     />
-                    {errors.businessName && <p className="text-red-600 text-sm">{errors.businessName}</p>}
+                    {errors.businessName && (
+                      <p className="text-red-600 text-sm">
+                        {errors.businessName}
+                      </p>
+                    )}
                   </div>
 
                   <div className="space-y-2">
-                    <label htmlFor="ownerName" className="text-sm font-medium text-gray-700 flex items-center gap-2">
-                      <svg className="h-4 w-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <label
+                      htmlFor="ownerName"
+                      className="text-sm font-medium text-gray-700 flex items-center gap-2"
+                    >
+                      <svg
+                        className="h-4 w-4 text-gray-500"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
                         <path
                           strokeLinecap="round"
                           strokeLinejoin="round"
@@ -257,16 +294,26 @@ export default function AdminRegisterPage() {
                       placeholder="Ej: Dr. Juan Pérez"
                       className={`text-gray-800 w-full px-3 py-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${
                         errors.ownerName
-                          ? "border-red-300 focus:border-red-500"
-                          : "border-gray-300 focus:border-blue-500"
+                          ? 'border-red-300 focus:border-red-500'
+                          : 'border-gray-300 focus:border-blue-500'
                       }`}
                     />
-                    {errors.ownerName && <p className="text-red-600 text-sm">{errors.ownerName}</p>}
+                    {errors.ownerName && (
+                      <p className="text-red-600 text-sm">{errors.ownerName}</p>
+                    )}
                   </div>
 
                   <div className="space-y-2">
-                    <label htmlFor="email" className="text-sm font-medium text-gray-700 flex items-center gap-2">
-                      <svg className="h-4 w-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <label
+                      htmlFor="email"
+                      className="text-sm font-medium text-gray-700 flex items-center gap-2"
+                    >
+                      <svg
+                        className="h-4 w-4 text-gray-500"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
                         <path
                           strokeLinecap="round"
                           strokeLinejoin="round"
@@ -284,15 +331,27 @@ export default function AdminRegisterPage() {
                       onChange={handleInputChange}
                       placeholder="tu@negocio.com"
                       className={`text-gray-800 w-full px-3 py-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${
-                        errors.email ? "border-red-300 focus:border-red-500" : "border-gray-300 focus:border-blue-500"
+                        errors.email
+                          ? 'border-red-300 focus:border-red-500'
+                          : 'border-gray-300 focus:border-blue-500'
                       }`}
                     />
-                    {errors.email && <p className="text-red-600 text-sm">{errors.email}</p>}
+                    {errors.email && (
+                      <p className="text-red-600 text-sm">{errors.email}</p>
+                    )}
                   </div>
 
                   <div className="space-y-2">
-                    <label htmlFor="phone" className="text-sm font-medium text-gray-700 flex items-center gap-2">
-                      <svg className="h-4 w-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <label
+                      htmlFor="phone"
+                      className="text-sm font-medium text-gray-700 flex items-center gap-2"
+                    >
+                      <svg
+                        className="h-4 w-4 text-gray-500"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
                         <path
                           strokeLinecap="round"
                           strokeLinejoin="round"
@@ -310,10 +369,14 @@ export default function AdminRegisterPage() {
                       onChange={handleInputChange}
                       placeholder="+34 123 456 789"
                       className={`text-gray-800 w-full px-3 py-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${
-                        errors.phone ? "border-red-300 focus:border-red-500" : "border-gray-300 focus:border-blue-500"
+                        errors.phone
+                          ? 'border-red-300 focus:border-red-500'
+                          : 'border-gray-300 focus:border-blue-500'
                       }`}
                     />
-                    {errors.phone && <p className="text-red-600 text-sm">{errors.phone}</p>}
+                    {errors.phone && (
+                      <p className="text-red-600 text-sm">{errors.phone}</p>
+                    )}
                   </div>
                 </>
               )}
@@ -321,8 +384,16 @@ export default function AdminRegisterPage() {
               {step === 2 && (
                 <>
                   <div className="space-y-2">
-                    <label htmlFor="businessType" className="text-sm font-medium text-gray-700 flex items-center gap-2">
-                      <svg className="h-4 w-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <label
+                      htmlFor="businessType"
+                      className="text-sm font-medium text-gray-700 flex items-center gap-2"
+                    >
+                      <svg
+                        className="h-4 w-4 text-gray-500"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
                         <path
                           strokeLinecap="round"
                           strokeLinejoin="round"
@@ -339,8 +410,8 @@ export default function AdminRegisterPage() {
                       onChange={handleInputChange}
                       className={`text-gray-800 w-full px-3 py-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${
                         errors.businessType
-                          ? "border-red-300 focus:border-red-500"
-                          : "border-gray-300 focus:border-blue-500"
+                          ? 'border-red-300 focus:border-red-500'
+                          : 'border-gray-300 focus:border-blue-500'
                       }`}
                     >
                       <option value="">Selecciona tu tipo de negocio</option>
@@ -350,12 +421,24 @@ export default function AdminRegisterPage() {
                         </option>
                       ))}
                     </select>
-                    {errors.businessType && <p className="text-red-600 text-sm">{errors.businessType}</p>}
+                    {errors.businessType && (
+                      <p className="text-red-600 text-sm">
+                        {errors.businessType}
+                      </p>
+                    )}
                   </div>
 
                   <div className="space-y-2">
-                    <label htmlFor="password" className="text-sm font-medium text-gray-700 flex items-center gap-2">
-                      <svg className="h-4 w-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <label
+                      htmlFor="password"
+                      className="text-sm font-medium text-gray-700 flex items-center gap-2"
+                    >
+                      <svg
+                        className="h-4 w-4 text-gray-500"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
                         <path
                           strokeLinecap="round"
                           strokeLinejoin="round"
@@ -369,14 +452,14 @@ export default function AdminRegisterPage() {
                       <input
                         id="password"
                         name="password"
-                        type={showPassword ? "text" : "password"}
+                        type={showPassword ? 'text' : 'password'}
                         value={formData.password}
                         onChange={handleInputChange}
                         placeholder="Mínimo 6 caracteres"
                         className={`text-gray-800 w-full px-3 py-3 pr-10 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${
                           errors.password
-                            ? "border-red-300 focus:border-red-500"
-                            : "border-gray-300 focus:border-blue-500"
+                            ? 'border-red-300 focus:border-red-500'
+                            : 'border-gray-300 focus:border-blue-500'
                         }`}
                       />
                       <button
@@ -385,7 +468,12 @@ export default function AdminRegisterPage() {
                         className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
                       >
                         {showPassword ? (
-                          <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <svg
+                            className="h-5 w-5"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
                             <path
                               strokeLinecap="round"
                               strokeLinejoin="round"
@@ -394,7 +482,12 @@ export default function AdminRegisterPage() {
                             />
                           </svg>
                         ) : (
-                          <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <svg
+                            className="h-5 w-5"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
                             <path
                               strokeLinecap="round"
                               strokeLinejoin="round"
@@ -411,7 +504,9 @@ export default function AdminRegisterPage() {
                         )}
                       </button>
                     </div>
-                    {errors.password && <p className="text-red-600 text-sm">{errors.password}</p>}
+                    {errors.password && (
+                      <p className="text-red-600 text-sm">{errors.password}</p>
+                    )}
                   </div>
 
                   <div className="space-y-2">
@@ -419,7 +514,12 @@ export default function AdminRegisterPage() {
                       htmlFor="confirmPassword"
                       className="text-sm font-medium text-gray-700 flex items-center gap-2"
                     >
-                      <svg className="h-4 w-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg
+                        className="h-4 w-4 text-gray-500"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
                         <path
                           strokeLinecap="round"
                           strokeLinejoin="round"
@@ -433,23 +533,30 @@ export default function AdminRegisterPage() {
                       <input
                         id="confirmPassword"
                         name="confirmPassword"
-                        type={showConfirmPassword ? "text" : "password"}
+                        type={showConfirmPassword ? 'text' : 'password'}
                         value={formData.confirmPassword}
                         onChange={handleInputChange}
                         placeholder="Repite tu contraseña"
                         className={`text-gray-800 w-full px-3 py-3 pr-10 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${
                           errors.confirmPassword
-                            ? "border-red-300 focus:border-red-500"
-                            : "border-gray-300 focus:border-blue-500"
+                            ? 'border-red-300 focus:border-red-500'
+                            : 'border-gray-300 focus:border-blue-500'
                         }`}
                       />
                       <button
                         type="button"
-                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        onClick={() =>
+                          setShowConfirmPassword(!showConfirmPassword)
+                        }
                         className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
                       >
                         {showConfirmPassword ? (
-                          <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <svg
+                            className="h-5 w-5"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
                             <path
                               strokeLinecap="round"
                               strokeLinejoin="round"
@@ -458,7 +565,12 @@ export default function AdminRegisterPage() {
                             />
                           </svg>
                         ) : (
-                          <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <svg
+                            className="h-5 w-5"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
                             <path
                               strokeLinecap="round"
                               strokeLinejoin="round"
@@ -475,7 +587,11 @@ export default function AdminRegisterPage() {
                         )}
                       </button>
                     </div>
-                    {errors.confirmPassword && <p className="text-red-600 text-sm">{errors.confirmPassword}</p>}
+                    {errors.confirmPassword && (
+                      <p className="text-red-600 text-sm">
+                        {errors.confirmPassword}
+                      </p>
+                    )}
                   </div>
 
                   <div className="space-y-2">
@@ -488,17 +604,27 @@ export default function AdminRegisterPage() {
                         className="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                       />
                       <span className="text-sm text-gray-700">
-                        Acepto los{" "}
-                        <button type="button" className="text-blue-600 hover:text-blue-800 underline">
+                        Acepto los{' '}
+                        <button
+                          type="button"
+                          className="text-blue-600 hover:text-blue-800 underline"
+                        >
                           términos y condiciones
-                        </button>{" "}
-                        y la{" "}
-                        <button type="button" className="text-blue-600 hover:text-blue-800 underline">
+                        </button>{' '}
+                        y la{' '}
+                        <button
+                          type="button"
+                          className="text-blue-600 hover:text-blue-800 underline"
+                        >
                           política de privacidad
                         </button>
                       </span>
                     </label>
-                    {errors.acceptTerms && <p className="text-red-600 text-sm">{errors.acceptTerms}</p>}
+                    {errors.acceptTerms && (
+                      <p className="text-red-600 text-sm">
+                        {errors.acceptTerms}
+                      </p>
+                    )}
                   </div>
                 </>
               )}
@@ -519,13 +645,17 @@ export default function AdminRegisterPage() {
                   disabled={isLoading}
                   className={`flex-1 py-3 px-4 rounded-lg font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
                     isLoading
-                      ? "bg-gray-400 text-gray-200 cursor-not-allowed"
-                      : "bg-blue-600 text-white hover:bg-blue-700"
+                      ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
+                      : 'bg-blue-600 text-white hover:bg-blue-700'
                   }`}
                 >
                   {isLoading ? (
                     <div className="flex items-center justify-center gap-2">
-                      <svg className="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
+                      <svg
+                        className="animate-spin h-5 w-5"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
                         <circle
                           className="opacity-25"
                           cx="12"
@@ -543,9 +673,9 @@ export default function AdminRegisterPage() {
                       Creando cuenta...
                     </div>
                   ) : step === 1 ? (
-                    "Continuar"
+                    'Continuar'
                   ) : (
-                    "Crear cuenta"
+                    'Crear cuenta'
                   )}
                 </button>
               </div>
@@ -555,9 +685,9 @@ export default function AdminRegisterPage() {
           {/* Footer */}
           <div className="bg-gray-50 px-8 py-4 border-t border-gray-100">
             <div className="text-center text-sm text-gray-600">
-              ¿Ya tienes cuenta?{" "}
+              ¿Ya tienes cuenta?{' '}
               <button
-                onClick={() => router.push("/admin/login")}
+                onClick={() => router.push('/admin/login')}
                 className="text-blue-600 hover:text-blue-800 font-medium"
               >
                 Inicia sesión aquí
