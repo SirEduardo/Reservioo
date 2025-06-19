@@ -17,5 +17,17 @@ export const getBusinessConfig = async (id: string) => {
     return business
 }
 
+export const updateBusinessSlug = async (companyId: string, newSlug: string) => {
+    // Verificar unicidad
+    const existing = await prisma.company.findUnique({ where: { slug: newSlug } })
+    if (existing) throw new Error('El slug ya está en uso')
+    // Actualizar slug
+    const updated = await prisma.company.update({
+        where: { id: companyId },
+        data: { slug: newSlug }
+    })
+    return updated
+}
+
 
 

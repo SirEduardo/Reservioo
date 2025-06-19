@@ -91,15 +91,14 @@ export const getSchedulesForProfessional: Controller = async (req, res) => {
 export const getAvailableDays: Controller = async (req, res) => {
     const { professionalId } = req.params;
     const range = parseInt(req.query.range as string) || 30;
-  
+    const { serviceId } = req.query;
+
     try {
-      console.log('getAvailableDays llamado con:', { professionalId, range });
+      console.log('getAvailableDays llamado con:', { professionalId, range, serviceId });
       
       let schedules;
-      
       if (professionalId) {
         // Buscar horarios para un profesional específico
-        console.log('Buscando horarios para profesional específico:', professionalId);
         schedules = await prisma.schedule.findMany({
           where: {
             professionals: {
@@ -111,7 +110,6 @@ export const getAvailableDays: Controller = async (req, res) => {
         });
       } else {
         // Buscar horarios para cualquier profesional
-        console.log('Buscando horarios para cualquier profesional');
         schedules = await prisma.schedule.findMany({
           where: {
             professionals: {
@@ -120,33 +118,31 @@ export const getAvailableDays: Controller = async (req, res) => {
           }
         });
       }
-      
-      console.log('Horarios encontrados:', schedules);
-      
-      if (schedules.length === 0) {
-        console.log('No se encontraron horarios configurados');
+      if (!schedules || schedules.length === 0) {
         return res.json([]);
       }
-      
+
+      // Obtener duración del servicio si se pasa serviceId
+      let minDuration = 30;
+      if (serviceId) {
+        const service = await prisma.service.findUnique({ where: { id: serviceId as string } });
+        if (service) {
+          minDuration = service.duration;
+        }
+      }
+
       const availableDates: string[] = [];
       const today = new Date();
-  
-      // Generar los próximos 30 días
+
       for (let i = 0; i < range; i++) {
         const date = new Date(today);
         date.setDate(today.getDate() + i);
-        const dayOfWeek = date.getDay(); // 0 = Domingo, 1 = Lunes, etc.
-  
-        // Verificar si hay un horario configurado para este día
-        const matchingSchedule = schedules.find((s: any) => s.dayOfWeek === dayOfWeek);
-        if (!matchingSchedule) {
-          console.log(`No hay horario configurado para el día ${dayOfWeek} (${date.toDateString()})`);
-          continue;
-        }
-  
-        console.log(`Día ${dayOfWeek} (${date.toDateString()}) tiene horario: ${matchingSchedule.startTime} - ${matchingSchedule.endTime}`);
-        
-        // Verificar reservas existentes para este día
+        const dayOfWeek = date.getDay();
+        // Tramos para ese día
+        const daySchedules = schedules.filter((s: any) => s.dayOfWeek === dayOfWeek);
+        if (!daySchedules || daySchedules.length === 0) continue;
+
+        // Buscar reservas para ese día
         let bookings;
         if (professionalId) {
           bookings = await prisma.booking.findMany({
@@ -156,7 +152,8 @@ export const getAvailableDays: Controller = async (req, res) => {
                 gte: new Date(date.setHours(0, 0, 0, 0)),
                 lt: new Date(date.setHours(23, 59, 59, 999))
               }
-            }
+            },
+            include: { service: true }
           });
         } else {
           bookings = await prisma.booking.findMany({
@@ -165,21 +162,106 @@ export const getAvailableDays: Controller = async (req, res) => {
                 gte: new Date(date.setHours(0, 0, 0, 0)),
                 lt: new Date(date.setHours(23, 59, 59, 999))
               }
-            }
+            },
+            include: { service: true }
           });
         }
-  
-        // Calcular slots disponibles
-        const totalSlots = calculateSlots(matchingSchedule.startTime, matchingSchedule.endTime, 30);
-        console.log(`Slots totales para ${date.toDateString()}: ${totalSlots.length}, Reservas: ${bookings.length}`);
-        
-        // Si hay menos reservas que slots totales, el día está disponible
-        if (bookings.length < totalSlots.length) {
+
+        // Calcular todos los slots posibles de todos los tramos
+        let slots: string[] = [];
+        for (const schedule of daySchedules) {
+          slots = slots.concat(calculateSlots(schedule.startTime, schedule.endTime, 30));
+        }
+        slots = slots.sort();
+
+        // Marcar slots ocupados por duración
+        const occupiedSlots = new Set();
+        for (const booking of bookings) {
+          const bookingStart = new Date(booking.date);
+          const duration = booking.service?.duration || 30;
+          const bookingEnd = new Date(bookingStart.getTime() + duration * 60000);
+          for (const slot of slots) {
+            const [h, m] = slot.split(":").map(Number);
+            const slotDate = new Date(Date.UTC(
+              bookingStart.getUTCFullYear(),
+              bookingStart.getUTCMonth(),
+              bookingStart.getUTCDate(),
+              h,
+              m,
+              0,
+              0
+            ));
+            if (slotDate >= bookingStart && slotDate < bookingEnd) {
+              occupiedSlots.add(slot);
+            }
+          }
+        }
+
+        // Filtrar slots realmente disponibles para la duración requerida
+        const hasAvailableSlot = slots.some(slot => {
+          const [h, m] = slot.split(":").map(Number);
+          const slotStart = new Date(Date.UTC(
+            date.getUTCFullYear(),
+            date.getUTCMonth(),
+            date.getUTCDate(),
+            h,
+            m,
+            0,
+            0
+          ));
+          const slotEnd = new Date(slotStart.getTime() + minDuration * 60000);
+          // ¿Hay algún slot dentro de este rango que esté ocupado?
+          for (const s of slots) {
+            const [sh, sm] = s.split(":").map(Number);
+            const sDate = new Date(Date.UTC(
+              date.getUTCFullYear(),
+              date.getUTCMonth(),
+              date.getUTCDate(),
+              sh,
+              sm,
+              0,
+              0
+            ));
+            if (sDate >= slotStart && sDate < slotEnd && occupiedSlots.has(s)) {
+              return false;
+            }
+          }
+          // Además, ¿el slotEnd está dentro de algún tramo horario?
+          let slotEndIsInSchedule = false;
+          for (const schedule of daySchedules) {
+            const [endH, endM] = schedule.endTime.split(":").map(Number);
+            const scheduleEnd = new Date(Date.UTC(
+              date.getUTCFullYear(),
+              date.getUTCMonth(),
+              date.getUTCDate(),
+              endH,
+              endM,
+              0,
+              0
+            ));
+            const [startH, startM] = schedule.startTime.split(":").map(Number);
+            const scheduleStart = new Date(Date.UTC(
+              date.getUTCFullYear(),
+              date.getUTCMonth(),
+              date.getUTCDate(),
+              startH,
+              startM,
+              0,
+              0
+            ));
+            if (slotStart >= scheduleStart && slotEnd <= scheduleEnd) {
+              slotEndIsInSchedule = true;
+              break;
+            }
+          }
+          return slotEndIsInSchedule;
+        });
+
+        if (hasAvailableSlot) {
           availableDates.push(date.toISOString().split("T")[0]);
         }
       }
-  
-      console.log('Fechas disponibles encontradas:', availableDates);
+
       res.json(availableDates);
     } catch (error) {
       console.error('Error en getAvailableDays:', error);
@@ -189,20 +271,20 @@ export const getAvailableDays: Controller = async (req, res) => {
 
   export const getAvailableHours: Controller = async (req, res) => {
     const { professionalId } = req.params;
-    const { date } = req.query;
+    const { date, serviceId } = req.query;
   
     try {
-      console.log('getAvailableHours llamado con:', { professionalId, date });
+      console.log('getAvailableHours llamado con:', { professionalId, date, serviceId });
       
       const parsedDate = new Date(date as string);
       const dayOfWeek = parsedDate.getDay();
       console.log('Día de la semana:', dayOfWeek, 'Fecha:', parsedDate.toDateString());
   
-      let schedule;
+      let schedules;
       if (professionalId) {
-        // Buscar horario para un profesional específico
-        console.log('Buscando horario para profesional específico:', professionalId);
-        schedule = await prisma.schedule.findFirst({
+        // Buscar todos los tramos horarios para un profesional específico
+        console.log('Buscando horarios para profesional específico:', professionalId);
+        schedules = await prisma.schedule.findMany({
           where: {
             dayOfWeek,
             professionals: {
@@ -213,9 +295,9 @@ export const getAvailableDays: Controller = async (req, res) => {
           }
         });
       } else {
-        // Buscar horarios para cualquier profesional en ese día
-        console.log('Buscando horario para cualquier profesional en día:', dayOfWeek);
-        schedule = await prisma.schedule.findFirst({
+        // Buscar todos los tramos horarios para cualquier profesional en ese día
+        console.log('Buscando horarios para cualquier profesional en día:', dayOfWeek);
+        schedules = await prisma.schedule.findMany({
           where: {
             dayOfWeek,
             professionals: {
@@ -225,9 +307,9 @@ export const getAvailableDays: Controller = async (req, res) => {
         });
       }
   
-      console.log('Horario encontrado:', schedule);
+      console.log('Horarios encontrados:', schedules);
       
-      if (!schedule) {
+      if (!schedules || schedules.length === 0) {
         console.log('No se encontró horario para el día:', dayOfWeek);
         return res.status(404).json({ message: "No trabaja ese día" });
       }
@@ -243,6 +325,9 @@ export const getAvailableDays: Controller = async (req, res) => {
               gte: new Date(`${date}T00:00:00.000Z`),
               lt: new Date(`${date}T23:59:59.999Z`)
             }
+          },
+          include: {
+            service: true
           }
         });
       } else {
@@ -254,20 +339,120 @@ export const getAvailableDays: Controller = async (req, res) => {
               gte: new Date(`${date}T00:00:00.000Z`),
               lt: new Date(`${date}T23:59:59.999Z`)
             }
+          },
+          include: {
+            service: true
           }
         });
       }
   
       console.log('Reservas encontradas:', bookings.length);
       
-      const bookedTimes = bookings.map((b: any) => new Date(b.date).toTimeString().slice(0, 5));
-      console.log('Horarios reservados:', bookedTimes);
-  
-      const slots = calculateSlots(schedule.startTime, schedule.endTime, 30);
+      // Calcular todos los slots posibles de todos los tramos
+      let slots: string[] = [];
+      for (const schedule of schedules) {
+        slots = slots.concat(calculateSlots(schedule.startTime, schedule.endTime, 30));
+      }
+      // Ordenar los slots por hora
+      slots = slots.sort();
       console.log('Todos los slots disponibles:', slots);
-      
-      const available = slots.filter(t => !bookedTimes.includes(t));
-      console.log('Slots disponibles después de filtrar reservas:', available);
+
+      // Crear un set de slots ocupados por duración
+      const occupiedSlots = new Set();
+      for (const booking of bookings) {
+        const bookingStart = new Date(booking.date);
+        const duration = booking.service?.duration || 30; // fallback 30 min
+        const bookingEnd = new Date(bookingStart.getTime() + duration * 60000);
+        // Marcar todos los slots que caen dentro del rango ocupado
+        for (const slot of slots) {
+          // slot: '09:00' -> convertir a Date en UTC en el mismo día
+          const [h, m] = slot.split(":").map(Number);
+          const slotDate = new Date(Date.UTC(
+            bookingStart.getUTCFullYear(),
+            bookingStart.getUTCMonth(),
+            bookingStart.getUTCDate(),
+            h,
+            m,
+            0,
+            0
+          ));
+          if (slotDate >= bookingStart && slotDate < bookingEnd) {
+            occupiedSlots.add(slot);
+          }
+        }
+      }
+
+      // Si se está consultando para un servicio específico, bloquear también los slots que no permitan completar la duración
+      let minDuration = 30;
+      if (serviceId) {
+        // Buscar la duración del servicio
+        const service = await prisma.service.findUnique({ where: { id: serviceId as string } });
+        if (service) {
+          minDuration = service.duration;
+        }
+      }
+      // Filtrar slots que permitan completar la duración
+      const available = slots.filter(slot => {
+        // slot: '09:00' -> convertir a Date en UTC en el mismo día
+        const [h, m] = slot.split(":").map(Number);
+        const slotStart = new Date(Date.UTC(
+          parsedDate.getUTCFullYear(),
+          parsedDate.getUTCMonth(),
+          parsedDate.getUTCDate(),
+          h,
+          m,
+          0,
+          0
+        ));
+        const slotEnd = new Date(slotStart.getTime() + minDuration * 60000);
+        // ¿Hay algún slot dentro de este rango que esté ocupado?
+        for (const s of slots) {
+          const [sh, sm] = s.split(":").map(Number);
+          const sDate = new Date(Date.UTC(
+            parsedDate.getUTCFullYear(),
+            parsedDate.getUTCMonth(),
+            parsedDate.getUTCDate(),
+            sh,
+            sm,
+            0,
+            0
+          ));
+          if (sDate >= slotStart && sDate < slotEnd && occupiedSlots.has(s)) {
+            return false;
+          }
+        }
+        // Además, ¿el slotEnd está dentro de algún tramo horario?
+        let slotEndIsInSchedule = false;
+        for (const schedule of schedules) {
+          const [endH, endM] = schedule.endTime.split(":").map(Number);
+          const scheduleEnd = new Date(Date.UTC(
+            parsedDate.getUTCFullYear(),
+            parsedDate.getUTCMonth(),
+            parsedDate.getUTCDate(),
+            endH,
+            endM,
+            0,
+            0
+          ));
+          const [startH, startM] = schedule.startTime.split(":").map(Number);
+          const scheduleStart = new Date(Date.UTC(
+            parsedDate.getUTCFullYear(),
+            parsedDate.getUTCMonth(),
+            parsedDate.getUTCDate(),
+            startH,
+            startM,
+            0,
+            0
+          ));
+          if (slotStart >= scheduleStart && slotEnd <= scheduleEnd) {
+            slotEndIsInSchedule = true;
+            break;
+          }
+        }
+        return slotEndIsInSchedule;
+      });
+
+      console.log('Slots disponibles después de filtrar reservas y duración:', available);
   
       res.json(available);
     } catch (error) {

@@ -39,8 +39,17 @@ export const useSchedule = () => {
   return context
 }
 
-export const ScheduleProvider = ({ children }: { children: ReactNode }) => {
-  const { companyId } = useDashboard()
+export const ScheduleProvider = ({
+  children,
+  companyId: companyIdProp
+}: {
+  children: ReactNode
+  companyId?: string
+}) => {
+  const companyId =
+    typeof companyIdProp === 'string' && companyIdProp
+      ? companyIdProp
+      : useDashboard()?.companyId
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [schedules, setSchedules] = useState<Schedule[]>([])

@@ -1,5 +1,7 @@
-import { getBusinessConfig } from "../models/business.models"
+import prisma from "../lib/prisma"
+import { getBusinessConfig, updateBusinessSlug } from "../models/business.models"
 import { Controller } from "../types"
+
 
 
 export const getBusiness: Controller = async (req, res) => {
@@ -12,6 +14,33 @@ export const getBusiness: Controller = async (req, res) => {
         res.status(500).json({ message: "Internal server error" })
     }
 }
+
+export const updateSlug: Controller = async (req, res) => {
+    try {
+        const { id } = req.params
+        const { slug } = req.body
+        if (!slug) return res.status(400).json({ message: "Slug requerido" })
+        try {
+            const updated = await updateBusinessSlug(id, slug)
+            res.status(200).json(updated)
+        } catch (err: any) {
+            if (err.message && err.message.includes('ya está en uso')) {
+                return res.status(409).json({ message: err.message })
+            }
+            throw err
+        }
+    } catch (error) {
+        res.status(500).json({ message: "Internal server error" })
+    }
+}
+
+// Endpoint público para obtener companyId por slug
+export const getCompanyIdBySlug: Controller = async (req, res) => {
+    const { slug } = req.params;
+    const company = await prisma.company.findUnique({ where: { slug } });
+    if (!company) return res.status(404).json({ message: "Empresa no encontrada" });
+    res.json({ companyId: company.id, businessName: company.businessName });
+};
 
 
 

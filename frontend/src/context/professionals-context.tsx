@@ -34,11 +34,16 @@ export const useProfessionals = () => {
 }
 
 export const ProfessionalsProvider = ({
-  children
+  children,
+  companyId: companyIdProp
 }: {
   children: ReactNode
+  companyId?: string
 }) => {
-  const { companyId } = useDashboard()
+  const companyId =
+    typeof companyIdProp === 'string' && companyIdProp
+      ? companyIdProp
+      : useDashboard()?.companyId
   const [professionals, setProfessionals] = useState<Professional[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)

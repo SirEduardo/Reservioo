@@ -88,7 +88,7 @@ export function BookingConfirmation({
                 className="text-sm"
                 style={{ color: currentTheme.colors.textSecondary }}
               >
-                {selectedService?.duration} minutos • €{selectedService?.price}
+                {selectedService?.duration} minutos • {selectedService?.price}€
               </div>
             </div>
           </div>

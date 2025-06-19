@@ -127,7 +127,8 @@ export default function AdminRegisterPage() {
       const data = await res.json()
       console.log('Registro existoso', data)
       localStorage.setItem('token', data.token)
-      router.push('/dashboard')
+      localStorage.setItem('companyId', data.admin.id)
+      window.location.href = '/dashboard'
     } catch (error) {
       setErrors({ form: 'Error de conexión con el servidor' })
     } finally {

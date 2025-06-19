@@ -36,7 +36,7 @@ export function TimeSelection({
   }
 
   const getTimeFromDate = (date: Date) => {
-    return format(date, 'HH:mm')
+    return date.toISOString().slice(11, 16) // 'HH:mm' en UTC
   }
 
   const hasSelectedTime = () => {

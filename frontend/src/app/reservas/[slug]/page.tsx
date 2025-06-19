@@ -1,7 +1,4 @@
 'use client'
-
-import type React from 'react'
-import { useState, useEffect } from 'react'
 import { ThemeProvider, useTheme } from '@/context/theme-context'
 import { ThemedCard } from '@/app/components/themed/card'
 import { Booking, TimeSlot } from '@/types'
@@ -17,17 +14,23 @@ import {
   BookingHeader
 } from '@/app/components/booking'
 import { apiUrl } from '@/app/api/apiUrl'
+import { ProfessionalsProvider } from '@/context/professionals-context'
+import { ServiceProvider } from '@/context/services-context'
+import { ScheduleProvider } from '@/context/schedules-context'
+import { useEffect, useState } from 'react'
+import React from 'react'
+import { useDashboard } from '@/context/dashboard-Context'
 
 // Datos de ejemplo
 const businessInfo = {
-  bussinessName: 'Centro de Servicios Profesionales',
+  bussinessName: 'Haz tu reserva Ya',
   ownerName: 'Marisol'
 }
 
 function BookingContent({ slug }: { slug: string }) {
   const { currentTheme } = useTheme()
   const { professionals } = useProfessionals()
-  const { services } = useService()
+  const { services, professionalServices } = useService()
   const [step, setStep] = useState(1)
   const [bookingData, setBookingData] = useState<Booking>({
     id: '',
@@ -45,6 +48,7 @@ function BookingContent({ slug }: { slug: string }) {
   const [isLoading, setIsLoading] = useState(false)
   const [isLoadingSlots, setIsLoadingSlots] = useState(false)
   const [companyData, setCompanyData] = useState<any>(null)
+  const [companyId, setCompanyId] = useState<string | null>(null)
 
   // Obtener datos de la empresa basándose en el slug
   const fetchCompanyData = async () => {
@@ -68,8 +72,29 @@ function BookingContent({ slug }: { slug: string }) {
     }
   }
 
+  // Obtener companyId por slug
+  const fetchCompanyId = async () => {
+    try {
+      const response = await fetch(`${apiUrl}/public/company-by-slug/${slug}`)
+      if (response.ok) {
+        const data = await response.json()
+        // Limpia el companyId de posibles corchetes
+        let cleanId = data.companyId
+        if (typeof cleanId === 'string') {
+          cleanId = cleanId.replace(/[[\]]/g, '')
+        }
+        setCompanyId(cleanId)
+      } else {
+        setCompanyId(null)
+      }
+    } catch (error) {
+      setCompanyId(null)
+    }
+  }
+
   useEffect(() => {
     fetchCompanyData()
+    fetchCompanyId()
   }, [slug])
 
   const fetchAvailableDates = async (professionalId: string | null) => {
@@ -119,44 +144,18 @@ function BookingContent({ slug }: { slug: string }) {
     if (!date) return []
 
     const dateStr = date.toISOString().split('T')[0]
+    const serviceId = bookingData.serviceId
 
     if (!professionalId) {
       // Si no hay profesional específico, buscar horarios disponibles para cualquier profesional
       try {
-        const res = await fetch(`${apiUrl}/availability/hours?date=${dateStr}`)
+        const res = await fetch(
+          `${apiUrl}/availability/hours?date=${dateStr}&serviceId=${serviceId}`
+        )
 
         if (!res.ok) {
           const errorText = await res.text()
           console.error('Error en API:', errorText)
-
-          // Si no hay horarios configurados, mostrar horarios por defecto para testing
-          if (res.status === 404) {
-            const defaultTimes = [
-              '09:00',
-              '09:30',
-              '10:00',
-              '10:30',
-              '11:00',
-              '11:30',
-              '12:00',
-              '12:30',
-              '13:00',
-              '13:30',
-              '14:00',
-              '14:30',
-              '15:00',
-              '15:30',
-              '16:00',
-              '16:30',
-              '17:00',
-              '17:30'
-            ]
-            return defaultTimes.map((time: string) => ({
-              time,
-              available: true,
-              professionalId: undefined
-            }))
-          }
 
           return []
         }
@@ -164,47 +163,20 @@ function BookingContent({ slug }: { slug: string }) {
         const times = await res.json()
         return times.map((time: string) => ({
           time,
-          available: true,
-          professionalId: undefined
+          available: true
         }))
       } catch (error) {
         console.error(
           'Error al obtener horarios para cualquier profesional:',
           error
         )
-
-        // En caso de error, mostrar horarios por defecto para testing
-        const defaultTimes = [
-          '09:00',
-          '09:30',
-          '10:00',
-          '10:30',
-          '11:00',
-          '11:30',
-          '12:00',
-          '12:30',
-          '13:00',
-          '13:30',
-          '14:00',
-          '14:30',
-          '15:00',
-          '15:30',
-          '16:00',
-          '16:30',
-          '17:00',
-          '17:30'
-        ]
-        return defaultTimes.map((time: string) => ({
-          time,
-          available: true,
-          professionalId: undefined
-        }))
+        return []
       }
     }
 
     try {
       const res = await fetch(
-        `${apiUrl}/availability/hours/${professionalId}?date=${dateStr}`
+        `${apiUrl}/availability/hours/${professionalId}?date=${dateStr}&serviceId=${serviceId}`
       )
 
       if (!res.ok) {
@@ -217,8 +189,7 @@ function BookingContent({ slug }: { slug: string }) {
 
       return times.map((time: string) => ({
         time,
-        available: true,
-        professionalId: professionalId || undefined
+        available: true
       }))
     } catch (error) {
       console.error(
@@ -262,12 +233,13 @@ function BookingContent({ slug }: { slug: string }) {
       // El backend se encargará de asignar uno disponible
     }
 
-    // Combine date and time into a single Date object
+    // Construir la fecha en UTC real para la hora seleccionada
     const [hours, minutes] = time.split(':').map(Number)
-    const combinedDate = new Date(bookingData.date)
-    combinedDate.setHours(hours, minutes, 0, 0)
-
-    setBookingData((prev) => ({ ...prev, date: combinedDate }))
+    const year = bookingData.date.getFullYear()
+    const month = bookingData.date.getMonth()
+    const day = bookingData.date.getDate()
+    const utcDate = new Date(Date.UTC(year, month, day, hours, minutes, 0, 0))
+    setBookingData((prev) => ({ ...prev, date: utcDate }))
   }
 
   const handleInputChange = (field: string, value: string) => {
@@ -283,7 +255,10 @@ function BookingContent({ slug }: { slug: string }) {
         throw new Error('No se han cargado los datos de la empresa')
       }
 
-      const companyId = companyData.company.id
+      const companyId =
+        typeof companyData.company.id === 'string'
+          ? companyData.company.id
+          : useDashboard()?.companyId
 
       // Si no hay profesional seleccionado, usar createBookingAuto
       if (!bookingData.professionalId) {
@@ -368,11 +343,22 @@ function BookingContent({ slug }: { slug: string }) {
     window.location.reload()
   }
 
+  // filtro de profesionales
+  const filteredProfessionals = bookingData.serviceId
+    ? professionals.filter((pro) =>
+        professionalServices.some(
+          (ps) =>
+            ps.professionalId === pro.id &&
+            ps.serviceId === bookingData.serviceId
+        )
+      )
+    : professionals
+
   if (isSubmitted) {
     return (
       <div
         className="min-h-screen p-4"
-        style={{ background: currentTheme.gradients.background }}
+        style={{ background: currentTheme.colors.background }}
       >
         <div className="max-w-2xl mx-auto pt-20">
           <ThemedCard>
@@ -389,99 +375,117 @@ function BookingContent({ slug }: { slug: string }) {
     )
   }
 
+  if (!companyId) {
+    return (
+      <div
+        style={{
+          minHeight: '100vh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}
+      >
+        Cargando datos de la empresa...
+      </div>
+    )
+  }
+
   return (
     <div
       className="min-h-screen"
-      style={{ background: currentTheme.gradients.background }}
+      style={{ background: currentTheme.colors.background }}
     >
-      <BookingHeader
-        currentStep={step}
-        businessInfo={businessInfo}
-        currentTheme={currentTheme}
-      />
-
-      <div className="max-w-4xl mx-auto p-4 py-6">
-        <ThemedCard className="p-6 sm:p-8">
-          {/* Step 1: Seleccionar Servicio */}
-          {step === 1 && (
-            <ServiceSelection
-              services={services}
-              selectedServiceId={bookingData.serviceId}
-              onServiceSelect={handleServiceSelect}
-              onContinue={() => setStep(2)}
-              currentTheme={currentTheme}
-            />
-          )}
-
-          {/* Step 2: Seleccionar Profesional */}
-          {step === 2 && (
-            <ProfessionalSelection
-              professionals={professionals}
-              selectedProfessionalId={bookingData.professionalId}
-              onProfessionalSelect={handleProfessionalSelect}
-              onBack={() => setStep(1)}
-              onContinue={() => setStep(3)}
-              currentTheme={currentTheme}
-            />
-          )}
-
-          {/* Step 3: Seleccionar Fecha */}
-          {step === 3 && (
-            <DateSelection
-              availableDates={availableDates}
-              selectedDate={bookingData.date}
-              selectedProfessional={getSelectedProfessional()}
-              onDateSelect={handleDateSelect}
-              onBack={() => setStep(2)}
-              onContinue={() => setStep(4)}
-              currentTheme={currentTheme}
-            />
-          )}
-
-          {/* Step 4: Seleccionar Hora */}
-          {step === 4 && (
-            <TimeSelection
-              availableSlots={availableSlots}
-              selectedDate={bookingData.date}
-              selectedProfessionalId={bookingData.professionalId}
-              isLoadingSlots={isLoadingSlots}
-              onTimeSelect={handleTimeSelect}
-              onBack={() => setStep(3)}
-              onContinue={() => setStep(5)}
-              onBackToDate={() => setStep(3)}
-              onBackToProfessional={() => setStep(2)}
-              currentTheme={currentTheme}
-            />
-          )}
-
-          {/* Step 5: Datos Personales */}
-          {step === 5 && (
-            <PersonalDataForm
-              bookingData={bookingData}
-              selectedService={getSelectedService()}
-              selectedProfessional={getSelectedProfessional()}
-              isLoading={isLoading}
-              onInputChange={handleInputChange}
-              onSubmit={handleSubmit}
-              onBack={() => setStep(4)}
-              currentTheme={currentTheme}
-            />
-          )}
-        </ThemedCard>
-      </div>
+      <ProfessionalsProvider companyId={companyId}>
+        <ServiceProvider companyId={companyId}>
+          <ScheduleProvider companyId={companyId}>
+            <ThemeProvider>
+              <BookingHeader
+                currentStep={step}
+                businessInfo={businessInfo}
+                currentTheme={currentTheme}
+              />
+              <div className="max-w-4xl mx-auto p-4 py-6">
+                <ThemedCard className="p-6 sm:p-8">
+                  {/* Step 1: Seleccionar Servicio */}
+                  {step === 1 && (
+                    <ServiceSelection
+                      services={services}
+                      selectedServiceId={bookingData.serviceId}
+                      onServiceSelect={handleServiceSelect}
+                      onContinue={() => setStep(2)}
+                      currentTheme={currentTheme}
+                    />
+                  )}
+                  {/* Step 2: Seleccionar Profesional */}
+                  {step === 2 && (
+                    <ProfessionalSelection
+                      professionals={filteredProfessionals}
+                      selectedProfessionalId={bookingData.professionalId}
+                      onProfessionalSelect={handleProfessionalSelect}
+                      onBack={() => setStep(1)}
+                      onContinue={() => setStep(3)}
+                      currentTheme={currentTheme}
+                    />
+                  )}
+                  {/* Step 3: Seleccionar Fecha */}
+                  {step === 3 && (
+                    <DateSelection
+                      availableDates={availableDates}
+                      selectedDate={bookingData.date}
+                      selectedProfessional={getSelectedProfessional()}
+                      onDateSelect={handleDateSelect}
+                      onBack={() => setStep(2)}
+                      onContinue={() => setStep(4)}
+                      currentTheme={currentTheme}
+                    />
+                  )}
+                  {/* Step 4: Seleccionar Hora */}
+                  {step === 4 && (
+                    <TimeSelection
+                      availableSlots={availableSlots}
+                      selectedDate={bookingData.date}
+                      selectedProfessionalId={bookingData.professionalId}
+                      isLoadingSlots={isLoadingSlots}
+                      onTimeSelect={handleTimeSelect}
+                      onBack={() => setStep(3)}
+                      onContinue={() => setStep(5)}
+                      onBackToDate={() => setStep(3)}
+                      onBackToProfessional={() => setStep(2)}
+                      currentTheme={currentTheme}
+                    />
+                  )}
+                  {/* Step 5: Datos Personales */}
+                  {step === 5 && (
+                    <PersonalDataForm
+                      bookingData={bookingData}
+                      selectedService={getSelectedService()}
+                      selectedProfessional={getSelectedProfessional()}
+                      isLoading={isLoading}
+                      onInputChange={handleInputChange}
+                      onSubmit={handleSubmit}
+                      onBack={() => setStep(4)}
+                      currentTheme={currentTheme}
+                    />
+                  )}
+                </ThemedCard>
+              </div>
+            </ThemeProvider>
+          </ScheduleProvider>
+        </ServiceProvider>
+      </ProfessionalsProvider>
     </div>
   )
 }
 
-export default async function BookingPage({
+export default function BookingPage({
   params
 }: {
   params: Promise<{ slug: string }>
 }) {
-  const resolvedParams = await params
+  const { slug } = React.use(params)
   return (
     <ThemeProvider>
-      <BookingContent slug={resolvedParams.slug} />
+      <BookingContent slug={slug} />
     </ThemeProvider>
   )
 }

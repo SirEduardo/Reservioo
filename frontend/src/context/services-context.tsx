@@ -40,8 +40,17 @@ export const useService = () => {
   return context
 }
 
-export const ServiceProvider = ({ children }: { children: ReactNode }) => {
-  const { companyId } = useDashboard()
+export const ServiceProvider = ({
+  children,
+  companyId: companyIdProp
+}: {
+  children: ReactNode
+  companyId?: string
+}) => {
+  const companyId =
+    typeof companyIdProp === 'string' && companyIdProp
+      ? companyIdProp
+      : useDashboard()?.companyId
   const [services, setServices] = useState<Service[]>([])
   const [professionalServices, setProfessionalServices] = useState<
     ProfessionalServices[]
