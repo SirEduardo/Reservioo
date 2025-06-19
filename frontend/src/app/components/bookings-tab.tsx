@@ -63,7 +63,6 @@ export default function BookingTab({
       }))
 
       setBookings(bookingsWithDates)
-      console.log('Bookings loaded:', bookingsWithDates)
     } catch (err) {
       console.error('Error fetching bookings:', err)
       setError(
@@ -97,8 +96,6 @@ export default function BookingTab({
 
       // Call parent handler if provided
       onDeleteBookingProp(bookingId)
-
-      console.log('Booking deleted successfully:', bookingId)
     } catch (err) {
       console.error('Error deleting booking:', err)
       setError(

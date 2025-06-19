@@ -40,10 +40,11 @@ export const ProfessionalsProvider = ({
   children: ReactNode
   companyId?: string
 }) => {
+  const dashboard = useDashboard()
   const companyId =
     typeof companyIdProp === 'string' && companyIdProp
       ? companyIdProp
-      : useDashboard()?.companyId
+      : dashboard?.companyId
   const [professionals, setProfessionals] = useState<Professional[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -57,7 +58,6 @@ export const ProfessionalsProvider = ({
       })
       const data = await response.json()
       setProfessionals(data)
-      console.log(data)
     } catch (error) {
       setError('Error al cargar profesionales')
     } finally {
@@ -91,7 +91,6 @@ export const ProfessionalsProvider = ({
       }
 
       const data = await response.json()
-      console.log('Professional deleted:', data)
 
       setProfessionals((prevProfessionals) =>
         prevProfessionals.filter(
@@ -104,6 +103,13 @@ export const ProfessionalsProvider = ({
   }
 
   useEffect(() => {
+    if (
+      !companyId ||
+      companyId === 'null' ||
+      companyId === 'undefined' ||
+      companyId === ''
+    )
+      return
     fetchProfessionals()
   }, [companyId])
 

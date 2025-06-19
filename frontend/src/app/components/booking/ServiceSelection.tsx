@@ -28,7 +28,13 @@ export function ServiceSelection({
         ¿Qué servicio necesitas?
       </h2>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+      <div
+        className={
+          services.length === 1
+            ? 'flex justify-center mb-6'
+            : 'grid grid-cols-1 md:grid-cols-2 gap-4 mb-6'
+        }
+      >
         {services.map((service) => (
           <button
             key={service.id}

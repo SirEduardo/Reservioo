@@ -21,7 +21,6 @@ export const createWeekly: Controller = async (req, res) => {
       const schedules = await getSchedules(companyId)
       res.status(200).json(schedules)
     } catch (error) {
-      console.error('Error in getSchedules:', error);
       res.status(500).json({ message: 'Error fetching schedules', error: String(error) });
     }
   }
@@ -94,8 +93,6 @@ export const getAvailableDays: Controller = async (req, res) => {
     const { serviceId } = req.query;
 
     try {
-      console.log('getAvailableDays llamado con:', { professionalId, range, serviceId });
-      
       let schedules;
       if (professionalId) {
         // Buscar horarios para un profesional específico
@@ -264,7 +261,6 @@ export const getAvailableDays: Controller = async (req, res) => {
 
       res.json(availableDates);
     } catch (error) {
-      console.error('Error en getAvailableDays:', error);
       res.status(500).json({ message: "Error", error: String(error) });
     }
   };
@@ -274,16 +270,12 @@ export const getAvailableDays: Controller = async (req, res) => {
     const { date, serviceId } = req.query;
   
     try {
-      console.log('getAvailableHours llamado con:', { professionalId, date, serviceId });
-      
       const parsedDate = new Date(date as string);
       const dayOfWeek = parsedDate.getDay();
-      console.log('Día de la semana:', dayOfWeek, 'Fecha:', parsedDate.toDateString());
   
       let schedules;
       if (professionalId) {
         // Buscar todos los tramos horarios para un profesional específico
-        console.log('Buscando horarios para profesional específico:', professionalId);
         schedules = await prisma.schedule.findMany({
           where: {
             dayOfWeek,
@@ -296,7 +288,6 @@ export const getAvailableDays: Controller = async (req, res) => {
         });
       } else {
         // Buscar todos los tramos horarios para cualquier profesional en ese día
-        console.log('Buscando horarios para cualquier profesional en día:', dayOfWeek);
         schedules = await prisma.schedule.findMany({
           where: {
             dayOfWeek,
@@ -307,17 +298,13 @@ export const getAvailableDays: Controller = async (req, res) => {
         });
       }
   
-      console.log('Horarios encontrados:', schedules);
-      
       if (!schedules || schedules.length === 0) {
-        console.log('No se encontró horario para el día:', dayOfWeek);
         return res.status(404).json({ message: "No trabaja ese día" });
       }
   
       let bookings;
       if (professionalId) {
         // Buscar reservas del profesional específico
-        console.log('Buscando reservas para profesional específico:', professionalId);
         bookings = await prisma.booking.findMany({
           where: {
             professionalId,
@@ -332,7 +319,6 @@ export const getAvailableDays: Controller = async (req, res) => {
         });
       } else {
         // Buscar todas las reservas para ese día
-        console.log('Buscando todas las reservas para el día:', date);
         bookings = await prisma.booking.findMany({
           where: {
             date: {
@@ -346,8 +332,6 @@ export const getAvailableDays: Controller = async (req, res) => {
         });
       }
   
-      console.log('Reservas encontradas:', bookings.length);
-      
       // Calcular todos los slots posibles de todos los tramos
       let slots: string[] = [];
       for (const schedule of schedules) {
@@ -355,7 +339,6 @@ export const getAvailableDays: Controller = async (req, res) => {
       }
       // Ordenar los slots por hora
       slots = slots.sort();
-      console.log('Todos los slots disponibles:', slots);
 
       // Crear un set de slots ocupados por duración
       const occupiedSlots = new Set();
@@ -452,24 +435,18 @@ export const getAvailableDays: Controller = async (req, res) => {
         return slotEndIsInSchedule;
       });
 
-      console.log('Slots disponibles después de filtrar reservas y duración:', available);
-  
       res.json(available);
     } catch (error) {
-      console.error('Error en getAvailableHours:', error);
       res.status(500).json({ message: "Error", error });
     }
   };
   export const getAvailableProfessional: Controller = async (req, res) => {
     try {
-      console.log('Entró a getAvailableProfessional');
       const { date, time } = req.query as { date: string; time: string };
-      console.log('Parámetros recibidos:', date, time);
   
       const professionals = await getAvailableProfessionals(date, time);
       res.json(professionals);
     } catch (error) {
-      console.error('Error in getAvailableProfessional:', error);
       res.status(500).json({ message: 'Error fetching professionals', error: String(error) });
     }
   };

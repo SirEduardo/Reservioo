@@ -125,7 +125,6 @@ export default function AdminRegisterPage() {
         return
       }
       const data = await res.json()
-      console.log('Registro existoso', data)
       localStorage.setItem('token', data.token)
       localStorage.setItem('companyId', data.admin.id)
       window.location.href = '/dashboard'

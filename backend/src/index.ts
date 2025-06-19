@@ -40,6 +40,4 @@ app.use("/api", bookingsRouter)
 app.use("/api", schedulesRouter)
 app.use("/api/availability", availabilityRouter)
 
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`)
-})
+app.listen(PORT)

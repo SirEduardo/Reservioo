@@ -37,7 +37,13 @@ export function ProfessionalSelection({
         disponible
       </p>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+      <div
+        className={
+          professionals.length === 1
+            ? 'flex justify-center mb-6 flex-wrap gap-4'
+            : 'grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6'
+        }
+      >
         {/* Opción: Cualquier profesional */}
         <button
           onClick={() => onProfessionalSelect(null)}

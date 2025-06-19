@@ -33,7 +33,6 @@ export default function AdminLoginPage() {
         return
       }
       const data = await response.json()
-      console.log(data)
       localStorage.setItem('companyId', data.admin.id)
       localStorage.setItem('token', data.token)
       window.location.href = '/dashboard'

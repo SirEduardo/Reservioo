@@ -46,10 +46,11 @@ export const ScheduleProvider = ({
   children: ReactNode
   companyId?: string
 }) => {
+  const dashboard = useDashboard()
   const companyId =
     typeof companyIdProp === 'string' && companyIdProp
       ? companyIdProp
-      : useDashboard()?.companyId
+      : dashboard?.companyId
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [schedules, setSchedules] = useState<Schedule[]>([])
@@ -66,7 +67,6 @@ export const ScheduleProvider = ({
       })
       const data = await response.json()
       setSchedules(data)
-      console.log(data)
     } catch (error) {
       setError('No se pudieron cargar los horarios')
     } finally {
@@ -88,7 +88,6 @@ export const ScheduleProvider = ({
         body: JSON.stringify(formData)
       })
       const data = await res.json()
-      console.log(data)
 
       setSchedules((schedules) => [...schedules, data])
     } catch (error) {
@@ -102,7 +101,6 @@ export const ScheduleProvider = ({
         method: 'DELETE'
       })
       const data = await res.json()
-      console.log('Schedule deleted', data)
 
       setSchedules((prevSchedules) =>
         prevSchedules.filter((schedule) => schedule.id !== scheduleId)
@@ -166,6 +164,13 @@ export const ScheduleProvider = ({
   }
 
   useEffect(() => {
+    if (
+      !companyId ||
+      companyId === 'null' ||
+      companyId === 'undefined' ||
+      companyId === ''
+    )
+      return
     fetchSchedules()
     fetchProfessionalSchedules()
   }, [companyId])

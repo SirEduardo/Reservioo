@@ -8,9 +8,7 @@ export const fetchBookingData: Controller = async (req, res) => {
   const { slug } = req.params
 
   try {
-    console.log('fetchBookingData iniciado con slug:', slug)
     const company = await getBookingDataBySlug(slug)
-    console.log('Company encontrada:', company?.id, company?.businessName)
 
     const services = company.services
     const professionals = company.professionals.map((prof) => ({
@@ -40,10 +38,8 @@ export const fetchBookingData: Controller = async (req, res) => {
       professionals,
     }
 
-    console.log('Respuesta fetchBookingData:', response)
     res.json(response)
   } catch (error) {
-    console.error('Error en fetchBookingData:', error)
     res.status(500).json({ 
       message: "Internal server error",
       error: error instanceof Error ? error.message : String(error)
@@ -62,7 +58,6 @@ export const createBooking: Controller = async (req, res) => {
         const booking = await createBookings(companyId, professionalId, serviceId, name, email, phone, date)
         res.status(201).json(booking)
     } catch (error) {
-      console.error(error)
       return res.status(500).json({ message: "Error interno del servidor", error: error instanceof Error ? error.message : error })   
     }
 }

@@ -36,7 +36,6 @@ function DashboardContent() {
   // Funciones para manejar eventos
   const handleDeleteBooking = (bookingId: string) => {
     // This function is now handled within the BookingTab component
-    console.log('Booking deleted from dashboard:', bookingId)
   }
 
   const handleUpdateSettings = (newSettings: CompanySettings) => {

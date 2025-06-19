@@ -47,10 +47,11 @@ export const ServiceProvider = ({
   children: ReactNode
   companyId?: string
 }) => {
+  const dashboard = useDashboard()
   const companyId =
     typeof companyIdProp === 'string' && companyIdProp
       ? companyIdProp
-      : useDashboard()?.companyId
+      : dashboard?.companyId
   const [services, setServices] = useState<Service[]>([])
   const [professionalServices, setProfessionalServices] = useState<
     ProfessionalServices[]
@@ -67,7 +68,6 @@ export const ServiceProvider = ({
       })
       const data = await response.json()
       setServices(data)
-      console.log(data)
     } catch (error) {
       setError('Error al cargar servicios')
     } finally {
@@ -104,7 +104,6 @@ export const ServiceProvider = ({
         throw new Error(`Failed to delete service: ${res.statusText}`)
       }
       const data = await res.json()
-      console.log('service deleted:', data)
 
       setServices((prevService) =>
         prevService.filter((service) => service.id !== serviceId)
@@ -169,6 +168,13 @@ export const ServiceProvider = ({
   }
 
   useEffect(() => {
+    if (
+      !companyId ||
+      companyId === 'null' ||
+      companyId === 'undefined' ||
+      companyId === ''
+    )
+      return
     fetchServices()
     fetchProfessionalServices()
   }, [companyId])
