@@ -247,7 +247,7 @@ function BookingContent({ slug }: { slug: string }) {
   const handleTimeSelect = async (time: string) => {
     setSelectedTime(time)
     if (!bookingData.professionalId && bookingData.date) {
-      const professionals = await fetchAvailableProfessional(
+      await fetchAvailableProfessional(
         typeof bookingData.date === 'string'
           ? new Date(bookingData.date)
           : bookingData.date,
