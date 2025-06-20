@@ -1,12 +1,24 @@
 'use client'
 
+// Definir tipo Theme mínimo
+export type Theme = {
+  colors: {
+    primary: string
+    primaryLight: string
+    surface: string
+    border: string
+    text: string
+    textSecondary: string
+  }
+}
+
 interface BookingHeaderProps {
   currentStep: number
   businessInfo: {
     bussinessName: string
     ownerName: string
   }
-  currentTheme: any
+  currentTheme: Theme
 }
 
 export function BookingHeader({

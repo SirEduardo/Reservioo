@@ -7,6 +7,18 @@ import { ThemedButton } from '../themed/button'
 import { ThemedInput } from '../themed/input'
 import { Service, Professional } from '@/types'
 
+// Definir tipo Theme mínimo
+export type Theme = {
+  colors: {
+    primary: string
+    primaryLight: string
+    surface: string
+    border: string
+    text: string
+    textSecondary: string
+  }
+}
+
 interface PersonalDataFormProps {
   bookingData: {
     name: string
@@ -22,7 +34,7 @@ interface PersonalDataFormProps {
   onInputChange: (field: string, value: string) => void
   onSubmit: (e: React.FormEvent) => void
   onBack: () => void
-  currentTheme: any
+  currentTheme: Theme
 }
 
 export function PersonalDataForm({

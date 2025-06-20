@@ -2,7 +2,6 @@
 import { useRouter } from 'next/navigation'
 import type React from 'react'
 import { useState } from 'react'
-import AdminLoginPage from '../login/page'
 import { apiUrl } from '@/app/api/apiUrl'
 
 export default function AdminRegisterPage() {

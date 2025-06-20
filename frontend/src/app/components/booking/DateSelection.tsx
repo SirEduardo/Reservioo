@@ -6,6 +6,18 @@ import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { ThemedButton } from '../themed/button'
 import { Professional } from '@/types'
 
+// Definir tipo Theme mínimo
+export type Theme = {
+  colors: {
+    primary: string
+    primaryLight: string
+    surface: string
+    border: string
+    text: string
+    textSecondary: string
+  }
+}
+
 interface DateSelectionProps {
   availableDates: Date[]
   selectedDate: Date | null
@@ -13,7 +25,7 @@ interface DateSelectionProps {
   onDateSelect: (date: Date) => void
   onBack: () => void
   onContinue: () => void
-  currentTheme: any
+  currentTheme: Theme
 }
 
 export function DateSelection({
