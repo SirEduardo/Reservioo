@@ -1,7 +1,5 @@
 'use client'
 
-import { format } from 'date-fns'
-import { es } from 'date-fns/locale'
 import { ChevronLeft, ChevronRight, Clock } from 'lucide-react'
 import { ThemedButton } from '../themed/button'
 import { Theme, TimeSlot } from '@/types'

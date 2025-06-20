@@ -70,9 +70,6 @@ function BookingContent({ slug }: { slug: string }) {
   const [companyId, setCompanyId] = useState<string | null>(null)
   const dashboard = useDashboard()
   const [selectedTime, setSelectedTime] = useState<string | null>(null)
-  const [availableProfessionals, setAvailableProfessionals] = useState<
-    Professional[]
-  >([])
 
   // Obtener datos de la empresa basándose en el slug
   const fetchCompanyData = React.useCallback(async () => {
@@ -256,7 +253,6 @@ function BookingContent({ slug }: { slug: string }) {
           : bookingData.date,
         time
       )
-      setAvailableProfessionals(professionals)
       // Aquí puedes mostrar un modal, mensaje, o usar la info como prefieras
     }
   }

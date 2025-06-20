@@ -9,7 +9,6 @@ import { useProfessionals } from '@/context/professionals-context'
 import { useService } from '@/context/services-context'
 import { useDashboard } from '@/context/dashboard-Context'
 import { apiUrl } from '@/app/api/apiUrl'
-import { formatInTimeZone } from 'date-fns-tz'
 
 interface BookingTabProps {
   bookings: Booking[]
