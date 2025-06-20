@@ -10,7 +10,6 @@ import professionalsRouter from "./routes/professionals.routes";
 import bookingsRouter from "./routes/bookings.routes";
 import schedulesRouter from "./routes/schedules.routes";
 import availabilityRouter from "./routes/availability.routes";
-import rateLimit from "express-rate-limit";
 dotenv.config();
 
 const app = express();
@@ -33,18 +32,6 @@ app.use(helmet({
 app.use(morgan("dev"))
 app.use(express.json())
 
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 150,
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: {
-    status: 429,
-    error: 'Demasiadas solicitudes desde esta IP. Por favor intenta más tarde'
-  }
-})
-
-app.use(limiter)
 
 app.use("/api/auth", authRouter)    
 app.use("/api", businessRouter)
