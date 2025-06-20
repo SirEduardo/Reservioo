@@ -37,8 +37,6 @@ export default function SchedulesTab() {
   })
 
   const [selectedDays, setSelectedDays] = useState<number[]>([])
-  const [copyFromSchedule, setCopyFromSchedule] = useState<string>('')
-  const [copyToDays, setCopyToDays] = useState<number[]>([])
 
   const handleAdd = () => {
     if (selectedDays.length === 0) {
@@ -59,14 +57,6 @@ export default function SchedulesTab() {
 
   const toggleDaySelection = (dayOfWeek: number) => {
     setSelectedDays((prev) =>
-      prev.includes(dayOfWeek)
-        ? prev.filter((d) => d !== dayOfWeek)
-        : [...prev, dayOfWeek]
-    )
-  }
-
-  ;(dayOfWeek: number) => {
-    setCopyToDays((prev) =>
       prev.includes(dayOfWeek)
         ? prev.filter((d) => d !== dayOfWeek)
         : [...prev, dayOfWeek]

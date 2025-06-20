@@ -1,13 +1,13 @@
 // Interfaces
 export interface Company {
-  id: String    
-  ownerName: String
-  email: String     
-  password: String
-  phone: String
-  businessName: String
-  businessType: String
-  slug: String  
+  id: string    
+  ownerName: string
+  email: string     
+  password: string
+  phone: string
+  businessName: string
+  businessType: string
+  slug: string  
 }
 export interface Professional {
     id: string
