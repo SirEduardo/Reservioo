@@ -98,7 +98,7 @@ export const ProfessionalsProvider = ({
         )
       )
     } catch {
-      setError('Error deleting professional:')
+      setError('Error eliminando profesional')
     }
   }
 

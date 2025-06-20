@@ -9,6 +9,7 @@ import { useProfessionals } from '@/context/professionals-context'
 import { useService } from '@/context/services-context'
 import { useDashboard } from '@/context/dashboard-Context'
 import { apiUrl } from '@/app/api/apiUrl'
+import { formatInTimeZone } from 'date-fns-tz'
 
 interface BookingTabProps {
   bookings: Booking[]
@@ -261,7 +262,17 @@ export default function BookingTab({
 
       <div className="space-y-4">
         {reservasDelMes
-          .sort((a, b) => (a.date?.getTime() || 0) - (b.date?.getTime() || 0))
+          .sort((a, b) => {
+            const aTime =
+              a.date instanceof Date
+                ? a.date.getTime()
+                : new Date(a.date as string).getTime()
+            const bTime =
+              b.date instanceof Date
+                ? b.date.getTime()
+                : new Date(b.date as string).getTime()
+            return aTime - bTime
+          })
           .map((booking) => (
             <div
               key={booking.id}
@@ -308,9 +319,15 @@ export default function BookingTab({
                     </div>
                     <div className="text-sm text-gray-600 flex items-center gap-1 sm:justify-end">
                       <Clock className="h-3 w-3" />
-                      {booking.date
-                        ? format(booking.date, 'HH:mm')
-                        : 'Hora no definida'}
+                      {(() => {
+                        if (!booking.date) return 'Hora no definida'
+                        if (typeof booking.date === 'string')
+                          return booking.date.slice(11, 16)
+                        if (booking.date instanceof Date)
+                          return booking.date.toISOString().slice(11, 16)
+                        // fallback para cualquier otro tipo
+                        return String(booking.date).slice(11, 16)
+                      })()}
                     </div>
                   </div>
                   <button

@@ -70,6 +70,9 @@ function BookingContent({ slug }: { slug: string }) {
   const [companyId, setCompanyId] = useState<string | null>(null)
   const dashboard = useDashboard()
   const [selectedTime, setSelectedTime] = useState<string | null>(null)
+  const [availableProfessionals, setAvailableProfessionals] = useState<
+    Professional[]
+  >([])
 
   // Obtener datos de la empresa basándose en el slug
   const fetchCompanyData = React.useCallback(async () => {
@@ -206,7 +209,12 @@ function BookingContent({ slug }: { slug: string }) {
   useEffect(() => {
     if (bookingData.date) {
       setIsLoadingSlots(true)
-      fetchAvailableHours(bookingData.professionalId, bookingData.date)
+      fetchAvailableHours(
+        bookingData.professionalId,
+        typeof bookingData.date === 'string'
+          ? new Date(bookingData.date)
+          : bookingData.date
+      )
         .then((slots) => {
           setAvailableSlots(slots)
           setIsLoadingSlots(false)
@@ -240,23 +248,17 @@ function BookingContent({ slug }: { slug: string }) {
   }
 
   const handleTimeSelect = async (time: string) => {
-    if (!bookingData.date) return
-
-    // Si no hay profesional seleccionado, buscar uno disponible
-    if (!bookingData.professionalId) {
-      await fetchAvailableProfessional(bookingData.date, time)
-      // No asignamos automáticamente un profesional si el usuario eligió "cualquier profesional"
-      // El backend se encargará de asignar uno disponible
-    }
-
-    // Construir la fecha en UTC real para la hora seleccionada
-    const [hours, minutes] = time.split(':').map(Number)
-    const year = bookingData.date.getFullYear()
-    const month = bookingData.date.getMonth()
-    const day = bookingData.date.getDate()
-    const utcDate = new Date(Date.UTC(year, month, day, hours, minutes, 0, 0))
-    setBookingData((prev) => ({ ...prev, date: utcDate }))
     setSelectedTime(time)
+    if (!bookingData.professionalId && bookingData.date) {
+      const professionals = await fetchAvailableProfessional(
+        typeof bookingData.date === 'string'
+          ? new Date(bookingData.date)
+          : bookingData.date,
+        time
+      )
+      setAvailableProfessionals(professionals)
+      // Aquí puedes mostrar un modal, mensaje, o usar la info como prefieras
+    }
   }
 
   const handleInputChange = (field: string, value: string) => {
@@ -268,9 +270,26 @@ function BookingContent({ slug }: { slug: string }) {
     setIsLoading(true)
 
     try {
-      if (!companyData) {
+      if (!companyData)
         throw new Error('No se han cargado los datos de la empresa')
-      }
+      if (!bookingData.date || !selectedTime)
+        throw new Error('Selecciona fecha y hora')
+
+      // Construir la fecha local solo aquí
+      const dateObj =
+        typeof bookingData.date === 'string'
+          ? new Date(bookingData.date)
+          : bookingData.date
+      const [hours, minutes] = selectedTime.split(':').map(Number)
+      const year = dateObj.getFullYear()
+      const month = dateObj.getMonth()
+      const day = dateObj.getDate()
+      new Date(year, month, day, hours, minutes, 0, 0)
+
+      const pad = (n: number) => n.toString().padStart(2, '0')
+      const localDateString = `${year}-${pad(month + 1)}-${pad(
+        day
+      )}T${selectedTime}:00`
 
       const companyId =
         typeof companyData.company.id === 'string'
@@ -285,7 +304,7 @@ function BookingContent({ slug }: { slug: string }) {
           name: bookingData.name,
           email: bookingData.email,
           phone: bookingData.phone,
-          date: bookingData.date?.toISOString()
+          date: localDateString
         }
 
         const response = await fetch(`${apiUrl}/bookings/auto`, {
@@ -313,7 +332,7 @@ function BookingContent({ slug }: { slug: string }) {
           name: bookingData.name,
           email: bookingData.email,
           phone: bookingData.phone,
-          date: bookingData.date?.toISOString()
+          date: localDateString
         }
 
         const response = await fetch(`${apiUrl}/bookings/${companyId}`, {
@@ -401,7 +420,13 @@ function BookingContent({ slug }: { slug: string }) {
         <div className="max-w-2xl mx-auto pt-20">
           <ThemedCard>
             <BookingConfirmation
-              bookingData={bookingData}
+              bookingData={{
+                ...bookingData,
+                date:
+                  typeof bookingData.date === 'string'
+                    ? new Date(bookingData.date)
+                    : bookingData.date
+              }}
               selectedService={getSelectedService()}
               selectedProfessional={getSelectedProfessional()}
               onNewBooking={handleNewBooking}
@@ -471,7 +496,11 @@ function BookingContent({ slug }: { slug: string }) {
                   {step === 3 && (
                     <DateSelection
                       availableDates={availableDates}
-                      selectedDate={bookingData.date}
+                      selectedDate={
+                        typeof bookingData.date === 'string'
+                          ? new Date(bookingData.date)
+                          : bookingData.date
+                      }
                       selectedProfessional={getSelectedProfessional()}
                       onDateSelect={handleDateSelect}
                       onBack={() => setStep(2)}
@@ -495,7 +524,13 @@ function BookingContent({ slug }: { slug: string }) {
                   )}
                   {step === 5 && (
                     <PersonalDataForm
-                      bookingData={bookingData}
+                      bookingData={{
+                        ...bookingData,
+                        date:
+                          typeof bookingData.date === 'string'
+                            ? new Date(bookingData.date)
+                            : bookingData.date
+                      }}
                       selectedService={getSelectedService()}
                       selectedProfessional={getSelectedProfessional()}
                       isLoading={isLoading}
