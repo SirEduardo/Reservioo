@@ -259,7 +259,8 @@ export const getAvailableDays: Controller = async (req, res) => {
         }
       }
 
-      res.json(availableDates);
+      const uniqueDates = [...new Set(availableDates)];
+      res.json(uniqueDates);
     } catch (error) {
       res.status(500).json({ message: "Error", error: String(error) });
     }
@@ -374,39 +375,48 @@ export const getAvailableDays: Controller = async (req, res) => {
           minDuration = service.duration;
         }
       }
-      // Filtrar slots que permitan completar la duración
-      const available = slots.filter(slot => {
-        // slot: '09:00' -> convertir a Date en UTC en el mismo día
-        const [h, m] = slot.split(":").map(Number);
-        const slotStart = new Date(
-          parsedDate.getFullYear(),
-          parsedDate.getMonth(),
-          parsedDate.getDate(),
-          h,
-          m,
-          0,
-          0
-        );
-        const slotEnd = new Date(slotStart.getTime() + minDuration * 60000);
-        // ¿Hay algún slot dentro de este rango que esté ocupado?
-        for (const s of slots) {
-          const [sh, sm] = s.split(":").map(Number);
-          const sDate = new Date(
+
+      let available: string[] = [];
+
+      for (const schedule of schedules) {
+        // Genera los slots para este tramo usando la fecha base consultada
+        const tramoSlots = calculateSlots(schedule.startTime, schedule.endTime, 30, 'Europe/Madrid', parsedDate);
+        console.log('Tramo:', schedule.startTime, '-', schedule.endTime);
+        console.log('Duración mínima:', minDuration);
+        console.log('Slots generados:', tramoSlots);
+
+        // Filtra los slots de este tramo
+        const tramoAvailable = tramoSlots.filter(slot => {
+          const [h, m] = slot.split(":").map(Number);
+          const slotStart = new Date(
             parsedDate.getFullYear(),
             parsedDate.getMonth(),
             parsedDate.getDate(),
-            sh,
-            sm,
+            h,
+            m,
             0,
             0
           );
-          if (sDate >= slotStart && sDate < slotEnd && occupiedSlots.has(s)) {
-            return false;
+          const slotEnd = new Date(slotStart.getTime() + minDuration * 60000);
+
+          // ¿Hay algún slot dentro de este rango que esté ocupado?
+          for (const s of tramoSlots) {
+            const [sh, sm] = s.split(":").map(Number);
+            const sDate = new Date(
+              parsedDate.getFullYear(),
+              parsedDate.getMonth(),
+              parsedDate.getDate(),
+              sh,
+              sm,
+              0,
+              0
+            );
+            if (sDate >= slotStart && sDate < slotEnd && occupiedSlots.has(s)) {
+              return false;
+            }
           }
-        }
-        // Además, ¿el slotEnd está dentro de algún tramo horario?
-        let slotEndIsInSchedule = false;
-        for (const schedule of schedules) {
+
+          // ¿El slotEnd está dentro de este tramo?
           const [endH, endM] = schedule.endTime.split(":").map(Number);
           const scheduleEnd = new Date(
             parsedDate.getFullYear(),
@@ -427,15 +437,15 @@ export const getAvailableDays: Controller = async (req, res) => {
             0,
             0
           );
-          if (slotStart >= scheduleStart && slotEnd <= scheduleEnd) {
-            slotEndIsInSchedule = true;
-            break;
-          }
-        }
-        return slotEndIsInSchedule;
-      });
+          return slotStart >= scheduleStart && slotEnd <= scheduleEnd;
+        });
 
-      res.json(available);
+        console.log('Slots disponibles:', tramoAvailable);
+        available = available.concat(tramoAvailable);
+      }
+
+      const uniqueSlots = [...new Set(available)].sort();
+      res.json(uniqueSlots);
     } catch (error) {
       res.status(500).json({ message: "Error", error });
     }

@@ -1,13 +1,33 @@
-import { toZonedTime, format } from 'date-fns-tz'
+import { format } from 'date-fns-tz'
 
-export function calculateSlots(start: string, end: string, intervalMinutes: number, timeZone = 'Europe/Madrid'): string[] {
+export function calculateSlots(
+  start: string,
+  end: string,
+  intervalMinutes: number,
+  timeZone = 'Europe/Madrid',
+  baseDate: Date = new Date()
+): string[] {
     const [ startHour, startMin ] = start.split(":").map(Number)
     const [ endHour, endMin ] = end.split(":").map(Number)
 
-    const today = new Date()
-    // Crear la fecha base en la zona horaria deseada
-    const startDate = toZonedTime(new Date(today.setHours(startHour, startMin, 0, 0)), timeZone)
-    const endDate = toZonedTime(new Date(today.setHours(endHour, endMin, 0, 0)), timeZone)
+    const startDate = new Date(
+        baseDate.getFullYear(),
+        baseDate.getMonth(),
+        baseDate.getDate(),
+        startHour,
+        startMin,
+        0,
+        0
+    )
+    const endDate = new Date(
+        baseDate.getFullYear(),
+        baseDate.getMonth(),
+        baseDate.getDate(),
+        endHour,
+        endMin,
+        0,
+        0
+    )
 
     const slots: string[] = []
     let current = new Date(startDate)

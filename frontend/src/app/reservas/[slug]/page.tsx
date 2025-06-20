@@ -473,10 +473,7 @@ function BookingContent({ slug }: { slug: string }) {
                     <ServiceSelection
                       services={services}
                       selectedServiceId={bookingData.serviceId}
-                      onServiceSelect={(serviceId) => {
-                        handleServiceSelect(serviceId)
-                        setStep(2)
-                      }}
+                      onServiceSelect={handleServiceSelect}
                       onContinue={() => setStep(2)}
                       currentTheme={currentTheme}
                     />
