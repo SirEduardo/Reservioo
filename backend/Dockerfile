@@ -20,4 +20,6 @@ RUN npm install --omit=dev
 COPY --from=builder /app/dist ./dist
 
 ENV NODE_ENV=production
-CMD ["node", "dist/index.js"]  # Ajusta a tu punto de entrada
+ENV PORT=10000   
+
+CMD ["node", "dist/index.js"]
