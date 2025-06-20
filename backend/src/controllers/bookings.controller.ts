@@ -1,4 +1,3 @@
-import { Professional, ProfessionalServices, ScheduleProfessional } from "@prisma/client";
 import prisma from "../lib/prisma";
 import { createBookings, deleteBookings, getBookingDataBySlug, getBookings, getBookingsById } from "../models/bookings.models";
 import { getAvailableProfessionals } from "../models/schedules.models";
