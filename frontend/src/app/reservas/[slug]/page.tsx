@@ -69,6 +69,7 @@ function BookingContent({ slug }: { slug: string }) {
   const [companyData, setCompanyData] = useState<CompanyData | null>(null)
   const [companyId, setCompanyId] = useState<string | null>(null)
   const dashboard = useDashboard()
+  const [selectedTime, setSelectedTime] = useState<string | null>(null)
 
   // Obtener datos de la empresa basándose en el slug
   const fetchCompanyData = React.useCallback(async () => {
@@ -255,6 +256,7 @@ function BookingContent({ slug }: { slug: string }) {
     const day = bookingData.date.getDate()
     const utcDate = new Date(Date.UTC(year, month, day, hours, minutes, 0, 0))
     setBookingData((prev) => ({ ...prev, date: utcDate }))
+    setSelectedTime(time)
   }
 
   const handleInputChange = (field: string, value: string) => {
@@ -480,7 +482,7 @@ function BookingContent({ slug }: { slug: string }) {
                   {step === 4 && (
                     <TimeSelection
                       availableSlots={availableSlots}
-                      selectedDate={bookingData.date}
+                      selectedTime={selectedTime}
                       selectedProfessionalId={bookingData.professionalId}
                       isLoadingSlots={isLoadingSlots}
                       onTimeSelect={handleTimeSelect}

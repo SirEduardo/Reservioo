@@ -8,7 +8,7 @@ import { Theme, TimeSlot } from '@/types'
 
 interface TimeSelectionProps {
   availableSlots: TimeSlot[]
-  selectedDate: Date | null
+  selectedTime: string | null
   selectedProfessionalId: string | null
   isLoadingSlots: boolean
   onTimeSelect: (time: string) => void
@@ -21,7 +21,7 @@ interface TimeSelectionProps {
 
 export function TimeSelection({
   availableSlots,
-  selectedDate,
+  selectedTime,
   selectedProfessionalId,
   isLoadingSlots,
   onTimeSelect,
@@ -31,19 +31,8 @@ export function TimeSelection({
   onBackToProfessional,
   currentTheme
 }: TimeSelectionProps) {
-  const formatDate = (date: Date) => {
-    return format(date, "EEEE, d 'de' MMMM", { locale: es })
-  }
-
-  const getTimeFromDate = (date: Date) => {
-    return date.toLocaleString().slice(11, 16) // 'HH:mm'
-  }
-
   const hasSelectedTime = () => {
-    if (!selectedDate) return false
-    const hours = selectedDate.getHours()
-    const minutes = selectedDate.getMinutes()
-    return hours !== 0 || minutes !== 0
+    return !!selectedTime
   }
 
   return (
@@ -58,11 +47,11 @@ export function TimeSelection({
         className="text-center mb-6"
         style={{ color: currentTheme.colors.textSecondary }}
       >
-        Horarios disponibles para {selectedDate && formatDate(selectedDate)}
+        Horarios disponibles
         {hasSelectedTime() && (
           <span style={{ color: currentTheme.colors.primary }}>
             {' '}
-            • Hora seleccionada: {selectedDate && getTimeFromDate(selectedDate)}
+            • Hora seleccionada: {selectedTime}
           </span>
         )}
       </p>
@@ -82,7 +71,7 @@ export function TimeSelection({
             Cargando horarios disponibles...
           </p>
         </div>
-      ) : (
+      ) : availableSlots.length > 0 ? (
         <>
           <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3 mb-6">
             {availableSlots.map((slot) => (
@@ -90,25 +79,20 @@ export function TimeSelection({
                 key={slot.time}
                 onClick={() => onTimeSelect(slot.time)}
                 className={`p-3 border-2 rounded-lg transition-all duration-300 text-center hover:shadow-lg hover:scale-105 ${
-                  selectedDate && getTimeFromDate(selectedDate) === slot.time
-                    ? 'ring-2 ring-blue-500'
-                    : ''
+                  selectedTime === slot.time ? 'ring-2 ring-blue-500' : ''
                 }`}
                 style={{
                   borderColor:
-                    selectedDate && getTimeFromDate(selectedDate) === slot.time
+                    selectedTime === slot.time
                       ? currentTheme.colors.primary
                       : currentTheme.colors.border,
                   backgroundColor:
-                    selectedDate && getTimeFromDate(selectedDate) === slot.time
+                    selectedTime === slot.time
                       ? currentTheme.colors.primaryLight
                       : currentTheme.colors.surface
                 }}
                 onMouseOver={(e) => {
-                  if (
-                    !selectedDate ||
-                    getTimeFromDate(selectedDate) !== slot.time
-                  ) {
+                  if (selectedTime !== slot.time) {
                     e.currentTarget.style.borderColor =
                       currentTheme.colors.primary
                     e.currentTarget.style.backgroundColor =
@@ -116,10 +100,7 @@ export function TimeSelection({
                   }
                 }}
                 onMouseOut={(e) => {
-                  if (
-                    !selectedDate ||
-                    getTimeFromDate(selectedDate) !== slot.time
-                  ) {
+                  if (selectedTime !== slot.time) {
                     e.currentTarget.style.borderColor =
                       currentTheme.colors.border
                     e.currentTarget.style.backgroundColor =
@@ -136,42 +117,39 @@ export function TimeSelection({
               </button>
             ))}
           </div>
-
-          {availableSlots.length === 0 && (
-            <div className="text-center py-8">
-              <div
-                className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"
-                style={{ backgroundColor: currentTheme.colors.primaryLight }}
-              >
-                <Clock
-                  className="h-8 w-8"
-                  style={{ color: currentTheme.colors.primary }}
-                />
-              </div>
-              <h3
-                className="text-lg font-semibold mb-2"
-                style={{ color: currentTheme.colors.text }}
-              >
-                No hay horarios disponibles
-              </h3>
-              <p style={{ color: currentTheme.colors.textSecondary }}>
-                No hay horarios disponibles para{' '}
-                {selectedDate && formatDate(selectedDate)}.
-                {selectedProfessionalId
-                  ? ` Intenta con otra fecha o selecciona "Cualquier profesional" para más opciones.`
-                  : ' Intenta con otra fecha o selecciona un profesional específico.'}
-              </p>
-              <div className="flex gap-3 justify-center mt-6">
-                <ThemedButton variant="outline" onClick={onBackToDate}>
-                  Elegir otra fecha
-                </ThemedButton>
-                <ThemedButton variant="outline" onClick={onBackToProfessional}>
-                  Cambiar profesional
-                </ThemedButton>
-              </div>
-            </div>
-          )}
         </>
+      ) : (
+        <div className="text-center py-8">
+          <div
+            className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"
+            style={{ backgroundColor: currentTheme.colors.primaryLight }}
+          >
+            <Clock
+              className="h-8 w-8"
+              style={{ color: currentTheme.colors.primary }}
+            />
+          </div>
+          <h3
+            className="text-lg font-semibold mb-2"
+            style={{ color: currentTheme.colors.text }}
+          >
+            No hay horarios disponibles
+          </h3>
+          <p style={{ color: currentTheme.colors.textSecondary }}>
+            No hay horarios disponibles para la fecha seleccionada.
+            {selectedProfessionalId
+              ? ` Intenta con otra fecha o selecciona "Cualquier profesional" para más opciones.`
+              : ' Intenta con otra fecha o selecciona un profesional específico.'}
+          </p>
+          <div className="flex gap-3 justify-center mt-6">
+            <ThemedButton variant="outline" onClick={onBackToDate}>
+              Elegir otra fecha
+            </ThemedButton>
+            <ThemedButton variant="outline" onClick={onBackToProfessional}>
+              Cambiar profesional
+            </ThemedButton>
+          </div>
+        </div>
       )}
 
       <div className="flex justify-between">
