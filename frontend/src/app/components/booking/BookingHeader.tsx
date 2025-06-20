@@ -1,16 +1,6 @@
 'use client'
 
-// Definir tipo Theme mínimo
-export type Theme = {
-  colors: {
-    primary: string
-    primaryLight: string
-    surface: string
-    border: string
-    text: string
-    textSecondary: string
-  }
-}
+import { Theme } from '@/types'
 
 interface BookingHeaderProps {
   currentStep: number

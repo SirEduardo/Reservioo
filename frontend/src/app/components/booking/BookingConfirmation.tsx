@@ -4,19 +4,7 @@ import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { CheckCircle, Briefcase, User, Calendar, Mail } from 'lucide-react'
 import { ThemedButton } from '../themed/button'
-import { Service, Professional } from '@/types'
-
-// Definir tipo Theme mínimo
-export type Theme = {
-  colors: {
-    primary: string
-    primaryLight: string
-    surface: string
-    border: string
-    text: string
-    textSecondary: string
-  }
-}
+import { Service, Professional, Theme } from '@/types'
 
 interface BookingConfirmationProps {
   bookingData: {

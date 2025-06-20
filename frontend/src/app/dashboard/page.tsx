@@ -15,7 +15,7 @@ import ServicesTab from '../components/tabs/services-tab'
 import ProfessionalsTab from '../components/tabs/professionals-tab'
 
 function DashboardContent() {
-  const { activeTab, setActiveTab, companyId } = useDashboard()
+  const { activeTab, setActiveTab } = useDashboard()
 
   // Estados para configuración
   const [settings, setSettings] = useState<CompanySettings>({
@@ -32,11 +32,6 @@ function DashboardContent() {
     { id: 'schedules', label: 'Horarios', icon: AlarmClock },
     { id: 'settings', label: 'Configuración', icon: Settings }
   ]
-
-  // Funciones para manejar eventos
-  const handleDeleteBooking = (bookingId: string) => {
-    // This function is now handled within the BookingTab component
-  }
 
   const handleUpdateSettings = (newSettings: CompanySettings) => {
     setSettings(newSettings)
@@ -101,9 +96,7 @@ function DashboardContent() {
 
         <ThemedCard className="bg-white rounded-b-xl shadow-xl p-6">
           {/* Renderizar el tab activo */}
-          {activeTab === 'reservas' && (
-            <BookingTab bookings={[]} onDeleteBooking={handleDeleteBooking} />
-          )}
+          {activeTab === 'reservas' && <BookingTab bookings={[]} />}
 
           {activeTab === 'professionals' && <ProfessionalsTab bookings={[]} />}
 

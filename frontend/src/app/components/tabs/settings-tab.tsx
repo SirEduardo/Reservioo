@@ -83,7 +83,7 @@ export default function SettingsTab({
       setBusinessSlug(data.slug)
       setSlugSuccess('¡Slug actualizado correctamente!')
       setTimeout(() => setSlugSuccess(''), 2000)
-    } catch (err) {
+    } catch {
       setSlugError('Error de red al actualizar el slug')
     } finally {
       setLoadingSlug(false)

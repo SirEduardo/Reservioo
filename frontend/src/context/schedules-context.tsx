@@ -67,7 +67,7 @@ export const ScheduleProvider = ({
       })
       const data = await response.json()
       setSchedules(data)
-    } catch (error) {
+    } catch {
       setError('No se pudieron cargar los horarios')
     } finally {
       setLoading(false)
@@ -90,7 +90,7 @@ export const ScheduleProvider = ({
       const data = await res.json()
 
       setSchedules((schedules) => [...schedules, data])
-    } catch (error) {
+    } catch {
       setError('Error añadiendo horarios')
     }
   }
@@ -100,12 +100,12 @@ export const ScheduleProvider = ({
       const res = await fetch(`${apiUrl}/schedules/${scheduleId}`, {
         method: 'DELETE'
       })
-      const data = await res.json()
+      await res.json()
 
       setSchedules((prevSchedules) =>
         prevSchedules.filter((schedule) => schedule.id !== scheduleId)
       )
-    } catch (error) {
+    } catch {
       setError('Error deleting schedule')
     }
   }
@@ -114,7 +114,7 @@ export const ScheduleProvider = ({
       const res = await fetch(`${apiUrl}/schedules/assignments/${companyId}`)
       const data = await res.json()
       setScheduleProfessionals(data)
-    } catch (err) {
+    } catch {
       console.error('Error cargando relaciones servicio-profesional')
     }
   }
@@ -158,7 +158,7 @@ export const ScheduleProvider = ({
           { scheduleId, professionalId }
         ])
       }
-    } catch (error) {
+    } catch {
       setError('Error toggling professional-schedule')
     }
   }

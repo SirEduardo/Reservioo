@@ -2,14 +2,14 @@
 
 import { Clock, ChevronRight } from 'lucide-react'
 import { ThemedButton } from '../themed/button'
-import { Service } from '@/types'
+import { Service, Theme } from '@/types'
 
 interface ServiceSelectionProps {
   services: Service[]
   selectedServiceId: string
   onServiceSelect: (serviceId: string) => void
   onContinue: () => void
-  currentTheme: any
+  currentTheme: Theme
 }
 
 export function ServiceSelection({

@@ -56,9 +56,7 @@ export default function ProfessionalsTab({ bookings }: ProfessionalsTabProps) {
             <ThemedInput
               label="Nombre del Profesional"
               value={newProfessional.name}
-              onChange={(e: any) =>
-                setNewProfessional({ name: e.target.value })
-              }
+              onChange={(e) => setNewProfessional({ name: e.target.value })}
               placeholder="Ej: María García"
             />
           </div>

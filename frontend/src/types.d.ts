@@ -1,4 +1,14 @@
 // Interfaces
+export interface Company {
+  id: String    
+  ownerName: String
+  email: String     
+  password: String
+  phone: String
+  businessName: String
+  businessType: String
+  slug: String  
+}
 export interface Professional {
     id: string
     name: string
@@ -12,7 +22,6 @@ export interface Service {
     price: number
     companyId: string
   }
-  
 export interface Schedule {
     id: string
     dayOfWeek: number
@@ -53,4 +62,15 @@ export interface CompanySettings {
     time: string
     available: boolean
     professionalId?: string
+  }
+
+  export type Theme = {
+    colors: {
+      primary: string
+      primaryLight: string
+      surface: string
+      border: string
+      text: string
+      textSecondary: string
+    }
   }

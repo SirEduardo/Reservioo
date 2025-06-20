@@ -57,27 +57,6 @@ export default function SchedulesTab() {
     setSelectedDays([])
   }
 
-  const handleCopySchedule = () => {
-    if (!copyFromSchedule || copyToDays.length === 0) {
-      alert('Selecciona un horario y los días de destino')
-      return
-    }
-
-    const sourceSchedule = schedules.find((s) => s.id === copyFromSchedule)
-    if (!sourceSchedule) return
-
-    copyToDays.forEach((dayOfWeek) => {
-      addSchedule({
-        startTime: sourceSchedule.startTime,
-        endTime: sourceSchedule.endTime,
-        dayOfWeek
-      })
-    })
-
-    setCopyFromSchedule('')
-    setCopyToDays([])
-  }
-
   const toggleDaySelection = (dayOfWeek: number) => {
     setSelectedDays((prev) =>
       prev.includes(dayOfWeek)
@@ -86,7 +65,7 @@ export default function SchedulesTab() {
     )
   }
 
-  const toggleCopyDaySelection = (dayOfWeek: number) => {
+  ;(dayOfWeek: number) => {
     setCopyToDays((prev) =>
       prev.includes(dayOfWeek)
         ? prev.filter((d) => d !== dayOfWeek)
@@ -230,9 +209,7 @@ export default function SchedulesTab() {
 
               <div className="space-y-4">
                 {daySchedules.map((schedule) => {
-                  const assignedProfessionals = getAssignedProfessionals(
-                    schedule.id
-                  )
+                  getAssignedProfessionals(schedule.id)
 
                   return (
                     <div

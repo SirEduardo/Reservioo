@@ -1,7 +1,14 @@
 'use client'
 import { ThemeProvider, useTheme } from '@/context/theme-context'
 import { ThemedCard } from '@/app/components/themed/card'
-import { Booking, TimeSlot } from '@/types'
+import {
+  Booking,
+  Company,
+  CompanySettings,
+  Professional,
+  Service,
+  TimeSlot
+} from '@/types'
 import { useProfessionals } from '@/context/professionals-context'
 import { useService } from '@/context/services-context'
 import {
@@ -29,14 +36,10 @@ const businessInfo = {
 
 // 1. Tipos auxiliares para companyData
 interface CompanyData {
-  company: {
-    id: string
-    name: string
-    type: string
-  }
-  settings: any
-  services: any[]
-  professionals: any[]
+  company: Company
+  settings: CompanySettings
+  services: Service[]
+  professionals: Professional[]
 }
 
 function BookingContent({ slug }: { slug: string }) {
@@ -103,7 +106,7 @@ function BookingContent({ slug }: { slug: string }) {
       } else {
         setCompanyId(null)
       }
-    } catch (error) {
+    } catch {
       setCompanyId(null)
     }
   }, [slug])

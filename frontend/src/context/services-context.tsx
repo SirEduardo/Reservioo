@@ -68,7 +68,7 @@ export const ServiceProvider = ({
       })
       const data = await response.json()
       setServices(data)
-    } catch (error) {
+    } catch {
       setError('Error al cargar servicios')
     } finally {
       setLoading(false)
@@ -90,7 +90,7 @@ export const ServiceProvider = ({
       })
       const data = await res.json()
       setServices((services) => [...services, data])
-    } catch (error) {
+    } catch {
       setError('Error adding services')
     }
   }
@@ -103,12 +103,12 @@ export const ServiceProvider = ({
       if (!res.ok) {
         throw new Error(`Failed to delete service: ${res.statusText}`)
       }
-      const data = await res.json()
+      await res.json()
 
       setServices((prevService) =>
         prevService.filter((service) => service.id !== serviceId)
       )
-    } catch (error) {
+    } catch {
       setError('Error deleting service:')
     }
   }
@@ -119,7 +119,7 @@ export const ServiceProvider = ({
       const data = await res.json()
       setProfessionalServices(data)
     } catch (err) {
-      console.error('Error cargando relaciones servicio-profesional')
+      console.error('Error cargando relaciones servicio-profesional', err)
     }
   }
 
@@ -162,7 +162,7 @@ export const ServiceProvider = ({
           { serviceId, professionalId }
         ])
       }
-    } catch (error) {
+    } catch {
       setError('Error toggling professional-service')
     }
   }

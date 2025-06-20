@@ -4,7 +4,7 @@ import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { ChevronLeft, ChevronRight, Clock } from 'lucide-react'
 import { ThemedButton } from '../themed/button'
-import { TimeSlot } from '@/types'
+import { Theme, TimeSlot } from '@/types'
 
 interface TimeSelectionProps {
   availableSlots: TimeSlot[]
@@ -16,7 +16,7 @@ interface TimeSelectionProps {
   onContinue: () => void
   onBackToDate: () => void
   onBackToProfessional: () => void
-  currentTheme: any
+  currentTheme: Theme
 }
 
 export function TimeSelection({

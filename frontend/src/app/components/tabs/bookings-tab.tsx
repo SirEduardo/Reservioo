@@ -12,12 +12,10 @@ import { apiUrl } from '@/app/api/apiUrl'
 
 interface BookingTabProps {
   bookings: Booking[]
-  onDeleteBooking: (bookingId: string) => void
 }
 
 export default function BookingTab({
-  bookings: initialBookings,
-  onDeleteBooking: onDeleteBookingProp
+  bookings: initialBookings
 }: BookingTabProps) {
   const { professionals } = useProfessionals()
   const { services } = useService()
@@ -57,7 +55,7 @@ export default function BookingTab({
       const data = await response.json()
 
       // Convert date strings to Date objects
-      const bookingsWithDates = data.map((booking: any) => ({
+      const bookingsWithDates = data.map((booking: Booking) => ({
         ...booking,
         date: booking.date ? new Date(booking.date) : null
       }))
@@ -93,9 +91,6 @@ export default function BookingTab({
 
       // Remove from local state
       setBookings((prev) => prev.filter((booking) => booking.id !== bookingId))
-
-      // Call parent handler if provided
-      onDeleteBookingProp(bookingId)
     } catch (err) {
       console.error('Error deleting booking:', err)
       setError(

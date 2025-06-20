@@ -58,7 +58,7 @@ export const ProfessionalsProvider = ({
       })
       const data = await response.json()
       setProfessionals(data)
-    } catch (error) {
+    } catch {
       setError('Error al cargar profesionales')
     } finally {
       setLoading(false)
@@ -76,7 +76,7 @@ export const ProfessionalsProvider = ({
       })
       const data = await response.json()
       setProfessionals((professionals) => [...professionals, data])
-    } catch (error) {
+    } catch {
       setError('Error adding professional')
     }
   }
@@ -90,14 +90,14 @@ export const ProfessionalsProvider = ({
         throw new Error(`Failed to delete professional: ${response.statusText}`)
       }
 
-      const data = await response.json()
+      await response.json()
 
       setProfessionals((prevProfessionals) =>
         prevProfessionals.filter(
           (professional) => professional.id !== professionalId
         )
       )
-    } catch (error) {
+    } catch {
       setError('Error deleting professional:')
     }
   }

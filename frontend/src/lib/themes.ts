@@ -57,11 +57,11 @@ export interface Theme {
     },
   ]
   
-  export const getThemeById = (id: string): Theme => {
+  export const getThemeById = (): Theme => {
     return themes[0] // Siempre devuelve el tema de healthcare
   }
   
-  export const getThemeByBusinessType = (businessType: string): Theme => {
+  export const getThemeByBusinessType = (): Theme => {
     return themes[0] // Siempre devuelve el tema de healthcare
   }
   
