@@ -10,7 +10,7 @@
       "strict": true,
       "resolveJsonModule": true,
       "outDir": "dist",
-      "rootDir": "src",
+      "rootDir": "src"
     },
     "include": ["src/**/*.ts"],
     "exclude": ["node_modules", "dist"]
