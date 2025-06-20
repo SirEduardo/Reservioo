@@ -4,13 +4,25 @@ import { User, ChevronLeft, ChevronRight } from 'lucide-react'
 import { ThemedButton } from '../themed/button'
 import { Professional } from '@/types'
 
+// Definir tipo Theme mínimo
+export type Theme = {
+  colors: {
+    primary: string
+    primaryLight: string
+    surface: string
+    border: string
+    text: string
+    textSecondary: string
+  }
+}
+
 interface ProfessionalSelectionProps {
   professionals: Professional[]
   selectedProfessionalId: string | null
   onProfessionalSelect: (professionalId: string | null) => void
   onBack: () => void
   onContinue: () => void
-  currentTheme: any
+  currentTheme: Theme
 }
 
 export function ProfessionalSelection({

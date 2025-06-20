@@ -240,10 +240,7 @@ function BookingContent({ slug }: { slug: string }) {
 
     // Si no hay profesional seleccionado, buscar uno disponible
     if (!bookingData.professionalId) {
-      const availableProfessionals = await fetchAvailableProfessional(
-        bookingData.date,
-        time
-      )
+      await fetchAvailableProfessional(bookingData.date, time)
       // No asignamos automáticamente un profesional si el usuario eligió "cualquier profesional"
       // El backend se encargará de asignar uno disponible
     }
@@ -302,7 +299,7 @@ function BookingContent({ slug }: { slug: string }) {
           )
         }
 
-        const booking = await response.json()
+        await response.json()
       } else {
         // Usar createBooking con profesional específico
         const requestBody = {
@@ -330,7 +327,7 @@ function BookingContent({ slug }: { slug: string }) {
           )
         }
 
-        const booking = await response.json()
+        await response.json()
       }
 
       setIsLoading(false)

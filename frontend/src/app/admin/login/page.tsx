@@ -36,7 +36,7 @@ export default function AdminLoginPage() {
       localStorage.setItem('companyId', data.admin.id)
       localStorage.setItem('token', data.token)
       window.location.href = '/dashboard'
-    } catch (error) {
+    } catch {
       setError('Error al conectar con el servidor')
     } finally {
       setIsLoading(false)

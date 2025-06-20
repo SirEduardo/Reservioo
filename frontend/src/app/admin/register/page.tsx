@@ -127,7 +127,7 @@ export default function AdminRegisterPage() {
       localStorage.setItem('token', data.token)
       localStorage.setItem('companyId', data.admin.id)
       window.location.href = '/dashboard'
-    } catch (error) {
+    } catch {
       setErrors({ form: 'Error de conexión con el servidor' })
     } finally {
       setIsLoading(false)
