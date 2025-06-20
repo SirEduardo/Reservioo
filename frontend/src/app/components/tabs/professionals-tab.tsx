@@ -1,14 +1,16 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Plus, Edit, Trash2, Users, User } from 'lucide-react'
-import { Booking, Professional } from '@/types'
-import { ThemedCard } from './themed/card'
-import { ThemedInput } from './themed/input'
-import { ThemedButton } from './themed/button'
+import { Booking } from '@/types'
+
 import { useTheme } from '@/context/theme-context'
-import { ThemedBadge } from './themed/badge'
+
 import { useProfessionals } from '@/context/professionals-context'
+import { ThemedCard } from '../themed/card'
+import { ThemedInput } from '../themed/input'
+import { ThemedButton } from '../themed/button'
+import { ThemedBadge } from '../themed/badge'
 
 interface ProfessionalsTabProps {
   bookings: Booking[]
@@ -54,7 +56,9 @@ export default function ProfessionalsTab({ bookings }: ProfessionalsTabProps) {
             <ThemedInput
               label="Nombre del Profesional"
               value={newProfessional.name}
-              onChange={(e) => setNewProfessional({ name: e.target.value })}
+              onChange={(e: any) =>
+                setNewProfessional({ name: e.target.value })
+              }
               placeholder="Ej: María García"
             />
           </div>

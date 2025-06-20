@@ -1,18 +1,18 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Calendar, Users, Briefcase, AlarmClock, Settings } from 'lucide-react'
 
 // Importar todos los componentes de tabs
-import BookingTab from '../components/bookings-tab'
-import ProfessionalsTab from '../components/professionals-tab'
-import ServicesTab from '../components/services-tab'
-import SchedulesTab from '../components/schedules-tab'
-import SettingsTab from '../components/settings-tab'
 import { CompanySettings } from '@/types'
 import { ThemedCard } from '../components/themed/card'
 import { ThemeProvider } from '@/context/theme-context'
 import { useDashboard } from '@/context/dashboard-Context'
+import BookingTab from '../components/tabs/bookings-tab'
+import SettingsTab from '../components/tabs/settings-tab'
+import SchedulesTab from '../components/tabs/schedules-tab'
+import ServicesTab from '../components/tabs/services-tab'
+import ProfessionalsTab from '../components/tabs/professionals-tab'
 
 function DashboardContent() {
   const { activeTab, setActiveTab, companyId } = useDashboard()

@@ -8,20 +8,17 @@ import {
   AlarmClock,
   Calendar,
   Clock,
-  Users,
-  Copy,
   Check
 } from 'lucide-react'
-import { ThemedButton } from './themed/button'
-import { ThemedSelect } from './themed/select'
-import { ThemedInput } from './themed/input'
-import { ThemedCard } from './themed/card'
-import { ThemedBadge } from './themed/badge'
+
 import { useTheme } from '@/context/theme-context'
 import { useSchedule } from '@/context/schedules-context'
 import { useProfessionals } from '@/context/professionals-context'
 import { Schedule } from '@/types'
-import { DAYS_OF_WEEK } from '../mocks'
+import { DAYS_OF_WEEK } from '@/app/mocks'
+import { ThemedCard } from '../themed/card'
+import { ThemedInput } from '../themed/input'
+import { ThemedButton } from '../themed/button'
 
 export default function SchedulesTab() {
   const { currentTheme } = useTheme()

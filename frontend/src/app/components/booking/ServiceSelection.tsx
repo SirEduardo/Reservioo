@@ -1,6 +1,6 @@
 'use client'
 
-import { Clock, ChevronRight, CheckCircle } from 'lucide-react'
+import { Clock, ChevronRight } from 'lucide-react'
 import { ThemedButton } from '../themed/button'
 import { Service } from '@/types'
 

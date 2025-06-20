@@ -1,15 +1,15 @@
 'use client'
 
 import { useState } from 'react'
-import { Plus, Edit, Trash2, Briefcase, Clock } from 'lucide-react'
-import { Professional, ProfessionalServices, Service } from '@/types'
-import { ThemedButton } from './themed/button'
-import { ThemedBadge } from './themed/badge'
-import { ThemedCard } from './themed/card'
-import { ThemedInput } from './themed/input'
+import { Plus, Trash2, Briefcase, Clock } from 'lucide-react'
+
 import { useTheme } from '@/context/theme-context'
 import { useProfessionals } from '@/context/professionals-context'
 import { useService } from '@/context/services-context'
+import { ThemedCard } from '../themed/card'
+import { ThemedInput } from '../themed/input'
+import { ThemedButton } from '../themed/button'
+import { ThemedBadge } from '../themed/badge'
 
 export default function ServicesTab() {
   const { currentTheme } = useTheme()

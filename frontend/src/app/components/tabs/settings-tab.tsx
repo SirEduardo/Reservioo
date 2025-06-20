@@ -3,15 +3,17 @@
 import { useState, useEffect } from 'react'
 import { Settings, Copy, Check } from 'lucide-react'
 import { Booking, CompanySettings } from '@/types'
-import { ThemedButton } from './themed/button'
-import { ThemedCard } from './themed/card'
-import { ThemedInput } from './themed/input'
+
 import { useTheme } from '@/context/theme-context'
 import { useProfessionals } from '@/context/professionals-context'
 import { useService } from '@/context/services-context'
 import { useSchedule } from '@/context/schedules-context'
-import { apiSlug, apiUrl } from '../api/apiUrl'
+
 import { useDashboard } from '@/context/dashboard-Context'
+import { apiSlug, apiUrl } from '@/app/api/apiUrl'
+import { ThemedCard } from '../themed/card'
+import { ThemedInput } from '../themed/input'
+import { ThemedButton } from '../themed/button'
 
 interface SettingsTabProps {
   settings: CompanySettings
