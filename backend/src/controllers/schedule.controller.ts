@@ -179,15 +179,15 @@ export const getAvailableDays: Controller = async (req, res) => {
           const bookingEnd = new Date(bookingStart.getTime() + duration * 60000);
           for (const slot of slots) {
             const [h, m] = slot.split(":").map(Number);
-            const slotDate = new Date(Date.UTC(
-              bookingStart.getUTCFullYear(),
-              bookingStart.getUTCMonth(),
-              bookingStart.getUTCDate(),
+            const slotDate = new Date(
+              bookingStart.getFullYear(),
+              bookingStart.getMonth(),
+              bookingStart.getDate(),
               h,
               m,
               0,
               0
-            ));
+            );
             if (slotDate >= bookingStart && slotDate < bookingEnd) {
               occupiedSlots.add(slot);
             }
@@ -197,28 +197,28 @@ export const getAvailableDays: Controller = async (req, res) => {
         // Filtrar slots realmente disponibles para la duración requerida
         const hasAvailableSlot = slots.some(slot => {
           const [h, m] = slot.split(":").map(Number);
-          const slotStart = new Date(Date.UTC(
-            date.getUTCFullYear(),
-            date.getUTCMonth(),
-            date.getUTCDate(),
+          const slotStart = new Date(
+            date.getFullYear(),
+            date.getMonth(),
+            date.getDate(),
             h,
             m,
             0,
             0
-          ));
+          );
           const slotEnd = new Date(slotStart.getTime() + minDuration * 60000);
           // ¿Hay algún slot dentro de este rango que esté ocupado?
           for (const s of slots) {
             const [sh, sm] = s.split(":").map(Number);
-            const sDate = new Date(Date.UTC(
-              date.getUTCFullYear(),
-              date.getUTCMonth(),
-              date.getUTCDate(),
+            const sDate = new Date(
+              date.getFullYear(),
+              date.getMonth(),
+              date.getDate(),
               sh,
               sm,
               0,
               0
-            ));
+            );
             if (sDate >= slotStart && sDate < slotEnd && occupiedSlots.has(s)) {
               return false;
             }
@@ -227,25 +227,25 @@ export const getAvailableDays: Controller = async (req, res) => {
           let slotEndIsInSchedule = false;
           for (const schedule of daySchedules) {
             const [endH, endM] = schedule.endTime.split(":").map(Number);
-            const scheduleEnd = new Date(Date.UTC(
-              date.getUTCFullYear(),
-              date.getUTCMonth(),
-              date.getUTCDate(),
+            const scheduleEnd = new Date(
+              date.getFullYear(),
+              date.getMonth(),
+              date.getDate(),
               endH,
               endM,
               0,
               0
-            ));
+            );
             const [startH, startM] = schedule.startTime.split(":").map(Number);
-            const scheduleStart = new Date(Date.UTC(
-              date.getUTCFullYear(),
-              date.getUTCMonth(),
-              date.getUTCDate(),
+            const scheduleStart = new Date(
+              date.getFullYear(),
+              date.getMonth(),
+              date.getDate(),
               startH,
               startM,
               0,
               0
-            ));
+            );
             if (slotStart >= scheduleStart && slotEnd <= scheduleEnd) {
               slotEndIsInSchedule = true;
               break;
@@ -350,15 +350,15 @@ export const getAvailableDays: Controller = async (req, res) => {
         for (const slot of slots) {
           // slot: '09:00' -> convertir a Date en UTC en el mismo día
           const [h, m] = slot.split(":").map(Number);
-          const slotDate = new Date(Date.UTC(
-            bookingStart.getUTCFullYear(),
-            bookingStart.getUTCMonth(),
-            bookingStart.getUTCDate(),
+          const slotDate = new Date(
+            bookingStart.getFullYear(),
+            bookingStart.getMonth(),
+            bookingStart.getDate(),
             h,
             m,
             0,
             0
-          ));
+          );
           if (slotDate >= bookingStart && slotDate < bookingEnd) {
             occupiedSlots.add(slot);
           }
@@ -378,28 +378,28 @@ export const getAvailableDays: Controller = async (req, res) => {
       const available = slots.filter(slot => {
         // slot: '09:00' -> convertir a Date en UTC en el mismo día
         const [h, m] = slot.split(":").map(Number);
-        const slotStart = new Date(Date.UTC(
-          parsedDate.getUTCFullYear(),
-          parsedDate.getUTCMonth(),
-          parsedDate.getUTCDate(),
+        const slotStart = new Date(
+          parsedDate.getFullYear(),
+          parsedDate.getMonth(),
+          parsedDate.getDate(),
           h,
           m,
           0,
           0
-        ));
+        );
         const slotEnd = new Date(slotStart.getTime() + minDuration * 60000);
         // ¿Hay algún slot dentro de este rango que esté ocupado?
         for (const s of slots) {
           const [sh, sm] = s.split(":").map(Number);
-          const sDate = new Date(Date.UTC(
-            parsedDate.getUTCFullYear(),
-            parsedDate.getUTCMonth(),
-            parsedDate.getUTCDate(),
+          const sDate = new Date(
+            parsedDate.getFullYear(),
+            parsedDate.getMonth(),
+            parsedDate.getDate(),
             sh,
             sm,
             0,
             0
-          ));
+          );
           if (sDate >= slotStart && sDate < slotEnd && occupiedSlots.has(s)) {
             return false;
           }
@@ -408,25 +408,25 @@ export const getAvailableDays: Controller = async (req, res) => {
         let slotEndIsInSchedule = false;
         for (const schedule of schedules) {
           const [endH, endM] = schedule.endTime.split(":").map(Number);
-          const scheduleEnd = new Date(Date.UTC(
-            parsedDate.getUTCFullYear(),
-            parsedDate.getUTCMonth(),
-            parsedDate.getUTCDate(),
+          const scheduleEnd = new Date(
+            parsedDate.getFullYear(),
+            parsedDate.getMonth(),
+            parsedDate.getDate(),
             endH,
             endM,
             0,
             0
-          ));
+          );
           const [startH, startM] = schedule.startTime.split(":").map(Number);
-          const scheduleStart = new Date(Date.UTC(
-            parsedDate.getUTCFullYear(),
-            parsedDate.getUTCMonth(),
-            parsedDate.getUTCDate(),
+          const scheduleStart = new Date(
+            parsedDate.getFullYear(),
+            parsedDate.getMonth(),
+            parsedDate.getDate(),
             startH,
             startM,
             0,
             0
-          ));
+          );
           if (slotStart >= scheduleStart && slotEnd <= scheduleEnd) {
             slotEndIsInSchedule = true;
             break;
