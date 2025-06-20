@@ -47,7 +47,7 @@ export interface Booking {
     serviceId: string
     name: string
     email: string
-    date: Date | null
+    date: string | Date | null
     phone?: string
   }
   

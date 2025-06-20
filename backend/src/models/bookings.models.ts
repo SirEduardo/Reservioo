@@ -29,7 +29,6 @@ export const getBookingDataBySlug = async (slug: string) => {
 }
 
 export const createBookings = async(companyId: string, professionalId: string, serviceId: string, name: string, email: string, phone: string, date: string) => {
-
   const dateObj = new Date(date)
   if (isNaN(dateObj.getTime())) {
     throw new Error("Fecha inválida")

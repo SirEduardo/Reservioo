@@ -48,7 +48,7 @@ model ScheduleProfessional {
   professionalId  String
 
   schedule      Schedule      @relation(fields: [scheduleId], references: [id])
-  professional  Professional  @relation(fields: [professionalId], references: [id])
+  professional Professional @relation(fields: [professionalId], references: [id], onDelete: Cascade)
 
   @@id([scheduleId, professionalId])
 }
@@ -64,7 +64,7 @@ model Booking {
   date           DateTime
 
   company      Company      @relation(fields: [companyId], references: [id])
-  professional Professional @relation(fields: [professionalId], references: [id])
+  professional Professional @relation(fields: [professionalId], references: [id], onDelete: Cascade)
   service      Service      @relation(fields: [serviceId], references: [id])
 }
 
@@ -95,7 +95,7 @@ model ProfessionalServices {
   professionalId String
   serviceId      String
 
-  professional   Professional @relation(fields: [professionalId], references: [id])
+  professional Professional @relation(fields: [professionalId], references: [id], onDelete: Cascade)
   service        Service      @relation(fields: [serviceId], references: [id])
 
   @@id([professionalId, serviceId])
