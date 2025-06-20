@@ -45,66 +45,67 @@ export function ProfessionalSelection({
         }
       >
         {/* Opción: Cualquier profesional */}
-        <button
-          onClick={() => onProfessionalSelect(null)}
-          className={`p-6 border-2 rounded-lg transition-all duration-300 hover:shadow-lg hover:scale-105 ${
-            selectedProfessionalId === null ? 'ring-2 ring-blue-500' : ''
-          }`}
-          style={{
-            borderColor:
-              selectedProfessionalId === null
-                ? currentTheme.colors.primary
-                : currentTheme.colors.border,
-            backgroundColor:
-              selectedProfessionalId === null
-                ? currentTheme.colors.primaryLight
-                : currentTheme.colors.surface
-          }}
-          onMouseOver={(e) => {
-            if (selectedProfessionalId !== null) {
-              e.currentTarget.style.borderColor = currentTheme.colors.primary
-              e.currentTarget.style.backgroundColor =
-                currentTheme.colors.primaryLight
-            }
-          }}
-          onMouseOut={(e) => {
-            if (selectedProfessionalId !== null) {
-              e.currentTarget.style.borderColor = currentTheme.colors.border
-              e.currentTarget.style.backgroundColor =
-                currentTheme.colors.surface
-            }
-          }}
-        >
-          <div className="flex items-center gap-4">
-            <div
-              className="w-12 h-12 rounded-full flex items-center justify-center"
-              style={{ backgroundColor: currentTheme.colors.primary }}
-            >
-              <User className="h-6 w-6 text-white" />
+        {false && (
+          <button
+            onClick={() => onProfessionalSelect(null)}
+            className={`p-6 border-2 rounded-lg transition-all duration-300 hover:shadow-lg hover:scale-105 ${
+              selectedProfessionalId === null ? 'ring-2 ring-blue-500' : ''
+            }`}
+            style={{
+              borderColor:
+                selectedProfessionalId === null
+                  ? currentTheme.colors.primary
+                  : currentTheme.colors.border,
+              backgroundColor:
+                selectedProfessionalId === null
+                  ? currentTheme.colors.primaryLight
+                  : currentTheme.colors.surface
+            }}
+            onMouseOver={(e) => {
+              if (selectedProfessionalId !== null) {
+                e.currentTarget.style.borderColor = currentTheme.colors.primary
+                e.currentTarget.style.backgroundColor =
+                  currentTheme.colors.primaryLight
+              }
+            }}
+            onMouseOut={(e) => {
+              if (selectedProfessionalId !== null) {
+                e.currentTarget.style.borderColor = currentTheme.colors.border
+                e.currentTarget.style.backgroundColor =
+                  currentTheme.colors.surface
+              }
+            }}
+          >
+            <div className="flex items-center gap-4">
+              <div
+                className="w-12 h-12 rounded-full flex items-center justify-center"
+                style={{ backgroundColor: currentTheme.colors.primary }}
+              >
+                <User className="h-6 w-6 text-white" />
+              </div>
+              <div className="text-left">
+                <h3
+                  className="font-semibold"
+                  style={{ color: currentTheme.colors.text }}
+                >
+                  Cualquier profesional
+                </h3>
+                <p
+                  className="text-sm"
+                  style={{ color: currentTheme.colors.textSecondary }}
+                >
+                  Te asignaremos el primero disponible
+                </p>
+                <p
+                  className="text-xs mt-1"
+                  style={{ color: currentTheme.colors.primary }}
+                >
+                  ✓ Más fechas y horarios disponibles
+                </p>
+              </div>
             </div>
-            <div className="text-left">
-              <h3
-                className="font-semibold"
-                style={{ color: currentTheme.colors.text }}
-              >
-                Cualquier profesional
-              </h3>
-              <p
-                className="text-sm"
-                style={{ color: currentTheme.colors.textSecondary }}
-              >
-                Te asignaremos el primero disponible
-              </p>
-              <p
-                className="text-xs mt-1"
-                style={{ color: currentTheme.colors.primary }}
-              >
-                ✓ Más fechas y horarios disponibles
-              </p>
-            </div>
-          </div>
-        </button>
-
+          </button>
+        )}
         {/* Profesionales específicos */}
         {professionals.map((professional) => (
           <button
