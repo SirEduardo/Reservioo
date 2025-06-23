@@ -246,6 +246,23 @@ function BookingContent({ slug }: { slug: string }) {
 
   const handleTimeSelect = async (time: string) => {
     setSelectedTime(time)
+    if (bookingData.date) {
+      const [hours, minutes] = time.split(':').map(Number)
+      const dateObj =
+        typeof bookingData.date === 'string'
+          ? new Date(bookingData.date)
+          : bookingData.date
+      const fullDate = new Date(
+        dateObj.getFullYear(),
+        dateObj.getMonth(),
+        dateObj.getDate(),
+        hours,
+        minutes,
+        0,
+        0
+      )
+      setBookingData((prev) => ({ ...prev, date: fullDate }))
+    }
     if (!bookingData.professionalId && bookingData.date) {
       await fetchAvailableProfessional(
         typeof bookingData.date === 'string'
@@ -406,6 +423,8 @@ function BookingContent({ slug }: { slug: string }) {
       </div>
     )
   }
+
+  console.log(bookingData)
 
   if (isSubmitted) {
     return (
