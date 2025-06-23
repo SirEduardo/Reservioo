@@ -1,6 +1,15 @@
 import { transporter } from "../lib/email";
 
+
 export async function sendConfirmationBooking({ booking, company }: any) {
+    const formattedDate = booking.date.toLocaleString('es-ES', {
+        day:'numeric',
+        month: 'numeric',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+    })
   const mailOptions = {
     from: `"${company.businessName}" <${process.env.EMAIL_SENDER}>`,
     to: booking.email,
@@ -11,7 +20,7 @@ Hola ${booking.name},
 
 Tu reserva ha sido confirmada:
 
-📅 Fecha: ${booking.date.toLocaleString('es-ES')}
+📅 Fecha: ${formattedDate}
 👤 Profesional: ${booking.professional?.name || 'Por confirmar'}
 💇 Servicio: ${booking.service?.name}
 
