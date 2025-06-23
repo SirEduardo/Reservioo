@@ -1,15 +1,7 @@
 'use client'
 import { ThemeProvider, useTheme } from '@/context/theme-context'
 import { ThemedCard } from '@/app/components/themed/card'
-import {
-  Booking,
-  BusinessInfo,
-  Company,
-  CompanySettings,
-  Professional,
-  Service,
-  TimeSlot
-} from '@/types'
+import { Booking, BusinessInfo, TimeSlot } from '@/types'
 import { useProfessionals } from '@/context/professionals-context'
 import { useService } from '@/context/services-context'
 import {
