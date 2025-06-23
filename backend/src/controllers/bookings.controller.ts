@@ -65,7 +65,8 @@ export const createBooking: Controller = async (req, res) => {
 }
 
 export const createBookingAuto: Controller = async (req, res) => {
-    const { companyId, serviceId, name, email, phone, date } = req.body;
+  const { companyId } = req.params
+    const { serviceId, name, email, phone, date } = req.body;
     if (!companyId || !serviceId || !name || !email || !phone || !date) {
       return res.status(400).json({ message: "Faltan campos obligatorios" })
     }

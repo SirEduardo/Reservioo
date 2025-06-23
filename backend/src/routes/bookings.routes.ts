@@ -7,7 +7,7 @@ const bookingsRouter = Router()
 
 bookingsRouter.get("/book/:slug/data", fetchBookingData)
 bookingsRouter.post("/bookings/:companyId", createBooking)
-bookingsRouter.post("/bookings/auto", createBookingAuto)
+bookingsRouter.post("/bookings/auto/:companyId", createBookingAuto)
 bookingsRouter.get("/bookings/id/:bookingId", getBookingById)
 bookingsRouter.get("/bookings/:companyId", getBooking)
 bookingsRouter.delete("/bookings/:bookingId", deleteBooking)

@@ -112,6 +112,9 @@ export const getAvailableDays: Controller = async (req, res) => {
             professionals: {
               some: {}
             }
+          },
+          include: {
+            professionals: true
           }
         });
       }
@@ -295,6 +298,9 @@ export const getAvailableDays: Controller = async (req, res) => {
             professionals: {
               some: {}
             }
+          },
+          include: {
+            professionals: true
           }
         });
       }
@@ -378,70 +384,90 @@ export const getAvailableDays: Controller = async (req, res) => {
 
       let available: string[] = [];
 
-      for (const schedule of schedules) {
-        // Genera los slots para este tramo usando la fecha base consultada
-        const tramoSlots = calculateSlots(schedule.startTime, schedule.endTime, 30, 'Europe/Madrid', parsedDate);
-        console.log('Tramo:', schedule.startTime, '-', schedule.endTime);
-        console.log('Duración mínima:', minDuration);
-        console.log('Slots generados:', tramoSlots);
-
-        // Filtra los slots de este tramo
-        const tramoAvailable = tramoSlots.filter(slot => {
-          const [h, m] = slot.split(":").map(Number);
-          const slotStart = new Date(
-            parsedDate.getFullYear(),
-            parsedDate.getMonth(),
-            parsedDate.getDate(),
-            h,
-            m,
-            0,
-            0
-          );
-          const slotEnd = new Date(slotStart.getTime() + minDuration * 60000);
-
-          // ¿Hay algún slot dentro de este rango que esté ocupado?
-          for (const s of tramoSlots) {
-            const [sh, sm] = s.split(":").map(Number);
-            const sDate = new Date(
+      if (!professionalId) {
+        const slotAvailability: Record<string, number> = {};
+        for (const schedule of schedules) {
+          const tramoSlots = calculateSlots(schedule.startTime, schedule.endTime, 30, 'Europe/Madrid', parsedDate);
+          for (const slot of tramoSlots) {
+            for (const sp of (schedule as any).professionals) {
+              const [h, m] = slot.split(":").map(Number);
+              const slotDate = new Date(
+                parsedDate.getFullYear(),
+                parsedDate.getMonth(),
+                parsedDate.getDate(),
+                h,
+                m,
+                0,
+                0
+              );
+              const existingBooking = bookings.find(
+                b => b.professionalId === sp.professionalId && new Date(b.date).getTime() === slotDate.getTime()
+              );
+              if (!existingBooking) {
+                slotAvailability[slot] = (slotAvailability[slot] || 0) + 1;
+              }
+            }
+          }
+        }
+        available = Object.entries(slotAvailability)
+          .filter(([slot, count]) => count > 0)
+          .map(([slot]) => slot)
+          .sort();
+      } else {
+        // Lógica original para un profesional específico
+        for (const schedule of schedules) {
+          const tramoSlots = calculateSlots(schedule.startTime, schedule.endTime, 30, 'Europe/Madrid', parsedDate);
+          const tramoAvailable = tramoSlots.filter(slot => {
+            const [h, m] = slot.split(":").map(Number);
+            const slotStart = new Date(
               parsedDate.getFullYear(),
               parsedDate.getMonth(),
               parsedDate.getDate(),
-              sh,
-              sm,
+              h,
+              m,
               0,
               0
             );
-            if (sDate >= slotStart && sDate < slotEnd && occupiedSlots.has(s)) {
-              return false;
+            const slotEnd = new Date(slotStart.getTime() + minDuration * 60000);
+            for (const s of tramoSlots) {
+              const [sh, sm] = s.split(":").map(Number);
+              const sDate = new Date(
+                parsedDate.getFullYear(),
+                parsedDate.getMonth(),
+                parsedDate.getDate(),
+                sh,
+                sm,
+                0,
+                0
+              );
+              if (sDate >= slotStart && sDate < slotEnd && occupiedSlots.has(s)) {
+                return false;
+              }
             }
-          }
-
-          // ¿El slotEnd está dentro de este tramo?
-          const [endH, endM] = schedule.endTime.split(":").map(Number);
-          const scheduleEnd = new Date(
-            parsedDate.getFullYear(),
-            parsedDate.getMonth(),
-            parsedDate.getDate(),
-            endH,
-            endM,
-            0,
-            0
-          );
-          const [startH, startM] = schedule.startTime.split(":").map(Number);
-          const scheduleStart = new Date(
-            parsedDate.getFullYear(),
-            parsedDate.getMonth(),
-            parsedDate.getDate(),
-            startH,
-            startM,
-            0,
-            0
-          );
-          return slotStart >= scheduleStart && slotEnd <= scheduleEnd;
-        });
-
-        console.log('Slots disponibles:', tramoAvailable);
-        available = available.concat(tramoAvailable);
+            const [endH, endM] = schedule.endTime.split(":").map(Number);
+            const scheduleEnd = new Date(
+              parsedDate.getFullYear(),
+              parsedDate.getMonth(),
+              parsedDate.getDate(),
+              endH,
+              endM,
+              0,
+              0
+            );
+            const [startH, startM] = schedule.startTime.split(":").map(Number);
+            const scheduleStart = new Date(
+              parsedDate.getFullYear(),
+              parsedDate.getMonth(),
+              parsedDate.getDate(),
+              startH,
+              startM,
+              0,
+              0
+            );
+            return slotStart >= scheduleStart && slotEnd <= scheduleEnd;
+          });
+          available = available.concat(tramoAvailable);
+        }
       }
 
       const uniqueSlots = [...new Set(available)].sort();

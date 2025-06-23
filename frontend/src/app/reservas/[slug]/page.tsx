@@ -312,7 +312,6 @@ function BookingContent({ slug }: { slug: string }) {
       // Si no hay profesional seleccionado, usar createBookingAuto
       if (!bookingData.professionalId) {
         const requestBody = {
-          companyId,
           serviceId: bookingData.serviceId,
           name: bookingData.name,
           email: bookingData.email,
@@ -320,7 +319,7 @@ function BookingContent({ slug }: { slug: string }) {
           date: localDateString
         }
 
-        const response = await fetch(`${apiUrl}/bookings/auto`, {
+        const response = await fetch(`${apiUrl}/bookings/auto/${companyId}`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'

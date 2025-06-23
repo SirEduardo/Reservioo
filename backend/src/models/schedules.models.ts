@@ -108,7 +108,11 @@ export const getAvailableProfessionals = async (date: string, time: string): Pro
     const schedules = await prisma.schedule.findMany({
       where: { dayOfWeek },
       include: {
-        professionals: true
+        professionals: {
+          include: {
+            professional: true
+          }
+        }
       }
     });
   
@@ -119,15 +123,16 @@ export const getAvailableProfessionals = async (date: string, time: string): Pro
       if (!slots.includes(time)) continue;
   
       for (const sp of schedule.professionals) {
+        const profId = sp.professionalId;
         const existingBooking = await prisma.booking.findFirst({
           where: {
             date: targetDate,
-            professionalId: sp.professionalId
+            professionalId: profId
           }
         });
   
         if (!existingBooking) {
-          availableProfessionals.push(sp.professionalId);
+          availableProfessionals.push(profId);
         }
       }
     }
