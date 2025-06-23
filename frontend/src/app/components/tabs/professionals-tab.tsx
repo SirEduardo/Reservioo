@@ -2,21 +2,15 @@
 
 import { useState } from 'react'
 import { Plus, Edit, Trash2, Users, User } from 'lucide-react'
-import { Booking } from '@/types'
-
 import { useTheme } from '@/context/theme-context'
-
 import { useProfessionals } from '@/context/professionals-context'
 import { ThemedCard } from '../themed/card'
 import { ThemedInput } from '../themed/input'
 import { ThemedButton } from '../themed/button'
 import { ThemedBadge } from '../themed/badge'
+import { useBookings } from '@/context/bookings-context'
 
-interface ProfessionalsTabProps {
-  bookings: Booking[]
-}
-
-export default function ProfessionalsTab({ bookings }: ProfessionalsTabProps) {
+export default function ProfessionalsTab() {
   const { currentTheme } = useTheme()
   const {
     loading,
@@ -25,13 +19,13 @@ export default function ProfessionalsTab({ bookings }: ProfessionalsTabProps) {
     handleAddProfessional,
     handleDeleteProfessional
   } = useProfessionals()
+  const { bookings } = useBookings()
   const [newProfessional, setNewProfessional] = useState({ name: '' })
 
   const handleAddInput = () => {
     handleAddProfessional(newProfessional.name)
     setNewProfessional({ name: '' })
   }
-
   if (loading) return <p>Cargando profesionales...</p>
   if (error) return <p>{error}</p>
 

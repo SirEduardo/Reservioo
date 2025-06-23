@@ -1,110 +1,22 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { format, isSameMonth, addMonths, subMonths } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { Calendar, Clock, Mail, Trash2, AlertCircle } from 'lucide-react'
-import { Booking } from '@/types'
 import { useProfessionals } from '@/context/professionals-context'
 import { useService } from '@/context/services-context'
-import { useDashboard } from '@/context/dashboard-Context'
-import { apiUrl } from '@/app/api/apiUrl'
+import { useBookings } from '@/context/bookings-context'
 
-interface BookingTabProps {
-  bookings: Booking[]
-}
-
-export default function BookingTab({
-  bookings: initialBookings
-}: BookingTabProps) {
+export default function BookingTab() {
   const { professionals } = useProfessionals()
   const { services } = useService()
-  const { companyId } = useDashboard()
+  const { bookings, handleDeleteBooking, fetchBookings, loading, error } =
+    useBookings()
 
-  const [bookings, setBookings] = useState<Booking[]>(initialBookings)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
   const [mesSeleccionado, setMesSeleccionado] = useState(new Date())
-  const [deletingBooking, setDeletingBooking] = useState<string | null>(null)
-
   const esMesActual = isSameMonth(mesSeleccionado, new Date())
-
-  // Fetch bookings from backend
-  const fetchBookings = async () => {
-    if (!companyId) {
-      setError('No se ha identificado la empresa')
-      setLoading(false)
-      return
-    }
-
-    try {
-      setLoading(true)
-      setError(null)
-
-      const response = await fetch(`${apiUrl}/bookings/${companyId}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      })
-
-      if (!response.ok) {
-        throw new Error(`Error al cargar reservas: ${response.status}`)
-      }
-
-      const data = await response.json()
-
-      // Convert date strings to Date objects
-      const bookingsWithDates = data.map((booking: Booking) => ({
-        ...booking,
-        date: booking.date ? new Date(booking.date) : null
-      }))
-
-      setBookings(bookingsWithDates)
-    } catch (err) {
-      console.error('Error fetching bookings:', err)
-      setError(
-        err instanceof Error
-          ? err.message
-          : 'Error desconocido al cargar reservas'
-      )
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  // Delete booking function
-  const handleDeleteBooking = async (bookingId: string) => {
-    try {
-      setDeletingBooking(bookingId)
-
-      const response = await fetch(`${apiUrl}/bookings/${bookingId}`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      })
-
-      if (!response.ok) {
-        throw new Error(`Error al eliminar reserva: ${response.status}`)
-      }
-
-      // Remove from local state
-      setBookings((prev) => prev.filter((booking) => booking.id !== bookingId))
-    } catch (err) {
-      console.error('Error deleting booking:', err)
-      setError(
-        err instanceof Error ? err.message : 'Error al eliminar la reserva'
-      )
-    } finally {
-      setDeletingBooking(null)
-    }
-  }
-
-  // Load bookings on component mount and when companyId changes
-  useEffect(() => {
-    fetchBookings()
-  }, [companyId])
+  const [deletingBooking, setDeletingBooking] = useState<string | null>(null)
 
   const reservasDelMes = bookings.filter(
     (booking) => booking.date && isSameMonth(booking.date, mesSeleccionado)
@@ -331,7 +243,6 @@ export default function BookingTab({
                   </div>
                   <button
                     onClick={() => handleDeleteBooking(booking.id)}
-                    disabled={deletingBooking === booking.id}
                     className={`p-3 rounded-lg transition-all duration-300 cursor-pointer ${
                       deletingBooking === booking.id
                         ? 'text-gray-400 cursor-not-allowed'

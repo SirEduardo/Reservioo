@@ -5,6 +5,7 @@ import { DashboardProvider } from '@/context/dashboard-Context'
 import { ProfessionalsProvider } from '@/context/professionals-context'
 import { ScheduleProvider } from '@/context/schedules-context'
 import { ServiceProvider } from '@/context/services-context'
+import { BookingsProvider } from '@/context/bookings-context'
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -34,7 +35,9 @@ export default function RootLayout({
         <DashboardProvider>
           <ServiceProvider>
             <ProfessionalsProvider>
-              <ScheduleProvider>{children}</ScheduleProvider>
+              <BookingsProvider>
+                <ScheduleProvider>{children}</ScheduleProvider>
+              </BookingsProvider>
             </ProfessionalsProvider>
           </ServiceProvider>
         </DashboardProvider>

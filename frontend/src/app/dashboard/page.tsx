@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { Calendar, Users, Briefcase, AlarmClock, Settings } from 'lucide-react'
 
 // Importar todos los componentes de tabs
 import { CompanySettings } from '@/types'
@@ -13,6 +12,7 @@ import SettingsTab from '../components/tabs/settings-tab'
 import SchedulesTab from '../components/tabs/schedules-tab'
 import ServicesTab from '../components/tabs/services-tab'
 import ProfessionalsTab from '../components/tabs/professionals-tab'
+import { tabs } from '../mocks'
 
 function DashboardContent() {
   const { activeTab, setActiveTab } = useDashboard()
@@ -24,14 +24,6 @@ function DashboardContent() {
     appointmentDuration: 30,
     appointmentBuffer: 15
   })
-
-  const tabs = [
-    { id: 'reservas', label: 'Reservas', icon: Calendar },
-    { id: 'professionals', label: 'Profesionales', icon: Users },
-    { id: 'services', label: 'Servicios', icon: Briefcase },
-    { id: 'schedules', label: 'Horarios', icon: AlarmClock },
-    { id: 'settings', label: 'Configuración', icon: Settings }
-  ]
 
   const handleUpdateSettings = (newSettings: CompanySettings) => {
     setSettings(newSettings)
@@ -96,9 +88,9 @@ function DashboardContent() {
 
         <ThemedCard className="bg-white rounded-b-xl shadow-xl p-6">
           {/* Renderizar el tab activo */}
-          {activeTab === 'reservas' && <BookingTab bookings={[]} />}
+          {activeTab === 'reservas' && <BookingTab />}
 
-          {activeTab === 'professionals' && <ProfessionalsTab bookings={[]} />}
+          {activeTab === 'professionals' && <ProfessionalsTab />}
 
           {activeTab === 'services' && <ServicesTab />}
 
