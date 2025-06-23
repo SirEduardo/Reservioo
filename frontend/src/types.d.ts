@@ -5,9 +5,15 @@ export interface Company {
   email: string     
   password: string
   phone: string
-  businessName: string
+  name: string
   businessType: string
   slug: string  
+}
+export interface BusinessInfo {
+  company: Company
+  professionals: Professional[]
+  services: Service[]
+  settings: CompanySettings
 }
 export interface Professional {
     id: string
