@@ -2,6 +2,7 @@ import prisma from "../lib/prisma";
 import { createBookings, deleteBookings, getBookingDataBySlug, getBookings, getBookingsById } from "../models/bookings.models";
 import { getAvailableProfessionals } from "../models/schedules.models";
 import { Controller } from "../types";
+import { sendConfirmationBooking } from "../utils/sendConfirmation";
 
 
 export const fetchBookingData: Controller = async (req, res) => {
@@ -92,9 +93,14 @@ export const createBookingAuto: Controller = async (req, res) => {
         email,
         phone,
         date: dateObj
+      },
+      include: {
+        company: true,
+        professional: true,
+        service: true,
       }
     });
-  
+    await sendConfirmationBooking({ booking, company: booking.company })
     res.status(201).json(booking);
   };
   

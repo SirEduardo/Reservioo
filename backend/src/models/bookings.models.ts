@@ -1,4 +1,5 @@
 import prisma from "../lib/prisma"
+import { sendConfirmationBooking } from "../utils/sendConfirmation"
 
 export const getBookingDataBySlug = async (slug: string) => {
   const company = await prisma.company.findUnique({
@@ -44,7 +45,7 @@ export const createBookings = async(companyId: string, professionalId: string, s
   if (!service) throw new Error("Service not found")
 
 
-    return prisma.booking.create({
+    const booking = await prisma.booking.create({
       data: {
         companyId,
         professionalId,
@@ -54,7 +55,14 @@ export const createBookings = async(companyId: string, professionalId: string, s
         phone,
         date: dateObj,
       },
+      include: {
+        company: true,
+        professional: true,
+        service: true,
+      }
     })
+    await sendConfirmationBooking({ booking, company: booking.company })
+    return booking
 }
 
 export const getBookings = async(companyId: string) => {
