@@ -11,8 +11,8 @@ Hola ${booking.name},
 
 Tu reserva ha sido confirmada:
 
-📅 Fecha: ${booking.date.toLocaleString()}
-👤 Profesional: ${booking.professional?.name}
+📅 Fecha: ${booking.date.toLocaleString('es-ES')}
+👤 Profesional: ${booking.professional?.name || 'Por confirmar'}
 💇 Servicio: ${booking.service?.name}
 
 Gracias por reservar con ${company.businessName}.
