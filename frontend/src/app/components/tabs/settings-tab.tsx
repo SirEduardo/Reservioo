@@ -2,41 +2,41 @@
 
 import { useState, useEffect } from 'react'
 import { Settings, Copy, Check } from 'lucide-react'
-import { Booking, CompanySettings } from '@/types'
-
+import { CompanySettings } from '@/types'
 import { useTheme } from '@/context/theme-context'
 import { useProfessionals } from '@/context/professionals-context'
 import { useService } from '@/context/services-context'
 import { useSchedule } from '@/context/schedules-context'
-
 import { useDashboard } from '@/context/dashboard-Context'
 import { apiSlug, apiUrl } from '@/app/api/apiUrl'
 import { ThemedCard } from '../themed/card'
 import { ThemedInput } from '../themed/input'
 import { ThemedButton } from '../themed/button'
+import { useBookings } from '@/context/bookings-context'
 
-interface SettingsTabProps {
-  settings: CompanySettings
-  bookings: Booking[]
-  onUpdateSettings: (settings: CompanySettings) => void
-}
-
-export default function SettingsTab({
-  settings,
-  bookings,
-  onUpdateSettings
-}: SettingsTabProps) {
+export default function SettingsTab() {
   const { currentTheme } = useTheme()
   const { professionals } = useProfessionals()
   const { services } = useService()
   const { schedules, scheduleProfessionals } = useSchedule()
+  const { bookings } = useBookings()
   const { companyId } = useDashboard()
+  const [settings, setSettings] = useState<CompanySettings>({
+    id: '1',
+    companyId: 'company-1',
+    appointmentDuration: 30,
+    appointmentBuffer: 15
+  })
   const [localSettings, setLocalSettings] = useState(settings)
   const [businessSlug, setBusinessSlug] = useState('')
   const [copied, setCopied] = useState(false)
   const [slugError, setSlugError] = useState('')
   const [slugSuccess, setSlugSuccess] = useState('')
   const [loadingSlug, setLoadingSlug] = useState(false)
+
+  const handleUpdateSettings = (newSettings: CompanySettings) => {
+    setSettings(newSettings)
+  }
 
   useEffect(() => {
     const fetchSlug = async () => {
@@ -56,7 +56,7 @@ export default function SettingsTab({
   }, [companyId])
 
   const handleSave = () => {
-    onUpdateSettings(localSettings)
+    handleUpdateSettings(localSettings)
   }
 
   const handleSaveSlug = async () => {

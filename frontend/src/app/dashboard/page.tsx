@@ -1,9 +1,6 @@
 'use client'
 
-import { useState } from 'react'
-
 // Importar todos los componentes de tabs
-import { CompanySettings } from '@/types'
 import { ThemedCard } from '../components/themed/card'
 import { ThemeProvider } from '@/context/theme-context'
 import { useDashboard } from '@/context/dashboard-Context'
@@ -18,16 +15,6 @@ function DashboardContent() {
   const { activeTab, setActiveTab } = useDashboard()
 
   // Estados para configuración
-  const [settings, setSettings] = useState<CompanySettings>({
-    id: '1',
-    companyId: 'company-1',
-    appointmentDuration: 30,
-    appointmentBuffer: 15
-  })
-
-  const handleUpdateSettings = (newSettings: CompanySettings) => {
-    setSettings(newSettings)
-  }
 
   return (
     <main
@@ -95,13 +82,7 @@ function DashboardContent() {
           {activeTab === 'services' && <ServicesTab />}
 
           {activeTab === 'schedules' && <SchedulesTab />}
-          {activeTab === 'settings' && (
-            <SettingsTab
-              settings={settings}
-              bookings={[]}
-              onUpdateSettings={handleUpdateSettings}
-            />
-          )}
+          {activeTab === 'settings' && <SettingsTab />}
         </ThemedCard>
       </div>
     </main>
