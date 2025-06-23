@@ -16,7 +16,6 @@ export default function BookingTab() {
 
   const [mesSeleccionado, setMesSeleccionado] = useState(new Date())
   const esMesActual = isSameMonth(mesSeleccionado, new Date())
-  const [deletingBooking, setDeletingBooking] = useState<string | null>(null)
 
   const reservasDelMes = bookings.filter(
     (booking) => booking.date && isSameMonth(booking.date, mesSeleccionado)
@@ -243,18 +242,10 @@ export default function BookingTab() {
                   </div>
                   <button
                     onClick={() => handleDeleteBooking(booking.id)}
-                    className={`p-3 rounded-lg transition-all duration-300 cursor-pointer ${
-                      deletingBooking === booking.id
-                        ? 'text-gray-400 cursor-not-allowed'
-                        : 'text-red-500 hover:bg-red-50'
-                    }`}
+                    className={`p-3 rounded-lg transition-all duration-300 cursor-pointer ${'text-red-500 hover:bg-red-50'}`}
                     aria-label="Eliminar reserva"
                   >
-                    {deletingBooking === booking.id ? (
-                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-red-500"></div>
-                    ) : (
-                      <Trash2 className="h-5 w-5" />
-                    )}
+                    <Trash2 className="h-5 w-5" />
                   </button>
                 </div>
               </div>
