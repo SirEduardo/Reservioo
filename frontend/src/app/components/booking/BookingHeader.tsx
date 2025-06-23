@@ -1,13 +1,10 @@
 'use client'
 
-import { Theme } from '@/types'
+import { BusinessInfo, Theme } from '@/types'
 
 interface BookingHeaderProps {
   currentStep: number
-  businessInfo: {
-    bussinessName: string
-    ownerName: string
-  }
+  businessInfo: BusinessInfo
   currentTheme: Theme
 }
 
@@ -32,13 +29,13 @@ export function BookingHeader({
               className="text-3xl font-bold mb-2"
               style={{ color: currentTheme.colors.text }}
             >
-              {businessInfo.bussinessName}
+              Haz tu reserva ya
             </h1>
             <p
               className="text-"
               style={{ color: currentTheme.colors.textSecondary }}
             >
-              {businessInfo.ownerName}
+              {businessInfo.company.name}
             </p>
           </div>
         </div>

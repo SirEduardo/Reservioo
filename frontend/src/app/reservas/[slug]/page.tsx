@@ -3,6 +3,7 @@ import { ThemeProvider, useTheme } from '@/context/theme-context'
 import { ThemedCard } from '@/app/components/themed/card'
 import {
   Booking,
+  BusinessInfo,
   Company,
   CompanySettings,
   Professional,
@@ -28,20 +29,6 @@ import { useEffect, useState } from 'react'
 import React from 'react'
 import { useDashboard } from '@/context/dashboard-Context'
 
-// Datos de ejemplo
-const businessInfo = {
-  bussinessName: 'Haz tu reserva Ya',
-  ownerName: 'Marisol'
-}
-
-// 1. Tipos auxiliares para companyData
-interface CompanyData {
-  company: Company
-  settings: CompanySettings
-  services: Service[]
-  professionals: Professional[]
-}
-
 function BookingContent({ slug }: { slug: string }) {
   const { currentTheme } = useTheme()
   const { professionals, loading: loadingProfessionals } = useProfessionals()
@@ -66,7 +53,7 @@ function BookingContent({ slug }: { slug: string }) {
   const [isSubmitted, setIsSubmitted] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [isLoadingSlots, setIsLoadingSlots] = useState(false)
-  const [companyData, setCompanyData] = useState<CompanyData | null>(null)
+  const [companyData, setCompanyData] = useState<BusinessInfo | null>(null)
   const [companyId, setCompanyId] = useState<string | null>(null)
   const dashboard = useDashboard()
   const [selectedTime, setSelectedTime] = useState<string | null>(null)
@@ -79,6 +66,7 @@ function BookingContent({ slug }: { slug: string }) {
       if (response.ok) {
         const data = await response.json()
         setCompanyData(data)
+        console.log('companyData', data)
       } else {
         const errorText = await response.text()
         console.error(
@@ -478,11 +466,13 @@ function BookingContent({ slug }: { slug: string }) {
             >
               <div className="max-w-2xl mx-auto pt-20">
                 <ThemedCard>
-                  <BookingHeader
-                    currentStep={step}
-                    businessInfo={businessInfo}
-                    currentTheme={currentTheme}
-                  />
+                  {companyData && (
+                    <BookingHeader
+                      currentStep={step}
+                      businessInfo={companyData}
+                      currentTheme={currentTheme}
+                    />
+                  )}
                   {step === 1 && (
                     <ServiceSelection
                       services={services}
