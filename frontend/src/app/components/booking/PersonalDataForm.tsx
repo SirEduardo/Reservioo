@@ -67,7 +67,7 @@ export function PersonalDataForm({
               style={{ color: currentTheme.colors.primary }}
             />
             <span style={{ color: currentTheme.colors.text }}>
-              {selectedService?.name} ({selectedService?.duration} min) -
+              {selectedService?.name} ({selectedService?.duration} min) -{' '}
               {selectedService?.price}€
             </span>
           </div>
