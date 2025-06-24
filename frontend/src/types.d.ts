@@ -19,6 +19,7 @@ export interface Professional {
     id: string
     name: string
     companyId: string
+    services: Service[]
   }
   
 export interface Service {

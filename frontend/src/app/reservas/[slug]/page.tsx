@@ -1,8 +1,7 @@
 'use client'
 import { ThemeProvider, useTheme } from '@/context/theme-context'
 import { ThemedCard } from '@/app/components/themed/card'
-import { Booking, BusinessInfo, TimeSlot } from '@/types'
-import { useService } from '@/context/services-context'
+import { Booking, BusinessInfo, Professional, Service, TimeSlot } from '@/types'
 import {
   ServiceSelection,
   ProfessionalSelection,
@@ -13,8 +12,6 @@ import {
   BookingHeader
 } from '@/app/components/booking'
 import { apiUrl } from '@/app/api/apiUrl'
-import { ServiceProvider } from '@/context/services-context'
-import { ScheduleProvider } from '@/context/schedules-context'
 import { useEffect, useState } from 'react'
 import React from 'react'
 import { useDashboard } from '@/context/dashboard-Context'
@@ -40,7 +37,6 @@ function BookingContent({ slug }: { slug: string }) {
   const [isLoading, setIsLoading] = useState(false)
   const [isLoadingSlots, setIsLoadingSlots] = useState(false)
   const [companyData, setCompanyData] = useState<BusinessInfo | null>(null)
-  const [companyId, setCompanyId] = useState<string | null>(null)
   const dashboard = useDashboard()
   const [selectedTime, setSelectedTime] = useState<string | null>(null)
   const [currentMonth, setCurrentMonth] = useState<number>(
@@ -83,13 +79,9 @@ function BookingContent({ slug }: { slug: string }) {
         if (typeof cleanId === 'string') {
           cleanId = cleanId.replace(/[[\]]/g, '')
         }
-        setCompanyId(cleanId)
       } else {
-        setCompanyId(null)
       }
-    } catch {
-      setCompanyId(null)
-    }
+    } catch {}
   }, [slug])
 
   useEffect(() => {
@@ -363,11 +355,11 @@ function BookingContent({ slug }: { slug: string }) {
   // filtro de profesionales
   const filteredProfessionals =
     companyData && bookingData.serviceId
-      ? companyData.professionals.filter((pro: any) =>
-          pro.services.some((s: any) => s.id === bookingData.serviceId)
+      ? companyData.professionals.filter((pro: Professional) =>
+          pro.services.some((s: Service) => s.id === bookingData.serviceId)
         )
       : companyData && companyData.professionals
-      ? companyData.professionals
+      ? (companyData.professionals as Professional[])
       : []
 
   const handleMonthChange = (direction: 'prev' | 'next') => {
@@ -490,7 +482,7 @@ function BookingContent({ slug }: { slug: string }) {
                 selectedProfessional={
                   companyData &&
                   companyData.professionals.find(
-                    (p: any) => p.id === bookingData.professionalId
+                    (p: Professional) => p.id === bookingData.professionalId
                   )
                 }
                 onDateSelect={handleDateSelect}
@@ -528,14 +520,14 @@ function BookingContent({ slug }: { slug: string }) {
                 selectedService={
                   companyData
                     ? companyData.services.find(
-                        (s: any) => s.id === bookingData.serviceId
+                        (s: Service) => s.id === bookingData.serviceId
                       )
                     : undefined
                 }
                 selectedProfessional={
                   companyData
                     ? companyData.professionals.find(
-                        (p: any) => p.id === bookingData.professionalId
+                        (p: Professional) => p.id === bookingData.professionalId
                       )
                     : undefined
                 }
