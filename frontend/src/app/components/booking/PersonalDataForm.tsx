@@ -227,13 +227,13 @@ export function PersonalDataForm({
             className="w-full text-base py-3"
           />
         </div>
-        {/* Botones con buen spacing */}
-        <div className="flex sm:flex-row justify-between gap-4 pt-4">
+
+        <div className="flex justify-between gap-2 sm:gap-0">
           <ThemedButton
             type="button"
             variant="outline"
             onClick={onBack}
-            className="order-1 w-full sm:w-auto py-3 text-base"
+            className="order-1 w-full sm:w-auto py-2 text-sm"
           >
             <ChevronLeft className="h-4 w-4 mr-2" />
             Atrás
@@ -242,7 +242,7 @@ export function PersonalDataForm({
           <ThemedButton
             type="submit"
             disabled={!isFormValid || isLoading}
-            className="order-2 w-full sm:w-auto py-3 text-base font-medium"
+            className="order-2 w-full sm:w-auto py-2 text-sm font-medium"
           >
             {isLoading ? (
               <div className="flex items-center gap-2">
@@ -253,7 +253,7 @@ export function PersonalDataForm({
                 Confirmando reserva...
               </div>
             ) : (
-              'Confirmar reserva'
+              'Reservar'
             )}
           </ThemedButton>
         </div>
