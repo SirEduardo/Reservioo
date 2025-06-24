@@ -257,7 +257,7 @@ export default function SettingsTab() {
                 className="flex justify-between"
                 style={{ color: currentTheme.colors.text }}
               >
-                <span>Reservas totales:</span>
+                <span>Reservas totales del mes:</span>
                 <span className="font-semibold">{bookings.length}</span>
               </div>
               <div

@@ -244,34 +244,8 @@ function BookingContent({ slug }: { slug: string }) {
     setBookingData((prev) => ({ ...prev, date }))
   }
 
-  const handleTimeSelect = async (time: string) => {
+  const handleTimeSelect = (time: string) => {
     setSelectedTime(time)
-    if (bookingData.date) {
-      const [hours, minutes] = time.split(':').map(Number)
-      const dateObj =
-        typeof bookingData.date === 'string'
-          ? new Date(bookingData.date)
-          : bookingData.date
-      const fullDate = new Date(
-        dateObj.getFullYear(),
-        dateObj.getMonth(),
-        dateObj.getDate(),
-        hours,
-        minutes,
-        0,
-        0
-      )
-      setBookingData((prev) => ({ ...prev, date: fullDate }))
-    }
-    if (!bookingData.professionalId && bookingData.date) {
-      await fetchAvailableProfessional(
-        typeof bookingData.date === 'string'
-          ? new Date(bookingData.date)
-          : bookingData.date,
-        time
-      )
-      // Aquí puedes mostrar un modal, mensaje, o usar la info como prefieras
-    }
   }
 
   const handleInputChange = (field: string, value: string) => {
@@ -414,6 +388,27 @@ function BookingContent({ slug }: { slug: string }) {
     }
   }
 
+  const handleTimeContinue = () => {
+    if (bookingData.date && selectedTime) {
+      const [hours, minutes] = selectedTime.split(':').map(Number)
+      const dateObj =
+        typeof bookingData.date === 'string'
+          ? new Date(bookingData.date)
+          : bookingData.date
+      const fullDate = new Date(
+        dateObj.getFullYear(),
+        dateObj.getMonth(),
+        dateObj.getDate(),
+        hours,
+        minutes,
+        0,
+        0
+      )
+      setBookingData((prev) => ({ ...prev, date: fullDate }))
+    }
+    setStep(5)
+  }
+
   // Mostrar loading hasta que companyId esté listo y sea válido
   if (
     !companyId ||
@@ -548,7 +543,7 @@ function BookingContent({ slug }: { slug: string }) {
                       isLoadingSlots={isLoadingSlots}
                       onTimeSelect={handleTimeSelect}
                       onBack={() => setStep(3)}
-                      onContinue={() => setStep(5)}
+                      onContinue={handleTimeContinue}
                       onBackToDate={() => setStep(3)}
                       onBackToProfessional={() => setStep(2)}
                       currentTheme={currentTheme}
