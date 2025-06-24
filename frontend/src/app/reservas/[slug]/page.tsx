@@ -388,7 +388,8 @@ function BookingContent({ slug }: { slug: string }) {
     }
   }
 
-  const handleTimeContinue = () => {
+  // Define la función fuera del JSX
+  const handleTimeContinue = async () => {
     if (bookingData.date && selectedTime) {
       const [hours, minutes] = selectedTime.split(':').map(Number)
       const dateObj =
@@ -405,6 +406,11 @@ function BookingContent({ slug }: { slug: string }) {
         0
       )
       setBookingData((prev) => ({ ...prev, date: fullDate }))
+      // Si no hay profesional seleccionado, llamar a fetchAvailableProfessional
+      if (!bookingData.professionalId) {
+        await fetchAvailableProfessional(fullDate, selectedTime)
+        // Aquí puedes mostrar un modal, sugerencia, etc. si lo deseas
+      }
     }
     setStep(5)
   }
