@@ -164,14 +164,21 @@ export function ProfessionalSelection({
         ))}
       </div>
 
-      <div className="flex justify-between">
-        <ThemedButton variant="outline" onClick={onBack}>
-          <ChevronLeft className="h-4 w-4 mr-2" />
+      <div className="flex justify-between gap-2 sm:gap-0">
+        <ThemedButton
+          variant="outline"
+          onClick={onBack}
+          className="order-1 w-full sm:w-auto py-2 text-sm"
+        >
+          <ChevronLeft className="h-4 w-4 mr-1" />
           Atrás
         </ThemedButton>
-        <ThemedButton onClick={onContinue}>
+        <ThemedButton
+          onClick={onContinue}
+          className="order-2 w-full sm:w-auto py-2 text-sm"
+        >
           Continuar
-          <ChevronRight className="h-4 w-4 ml-2" />
+          <ChevronRight className="h-4 w-4 ml-1" />
         </ThemedButton>
       </div>
     </div>

@@ -20,6 +20,7 @@ import { ScheduleProvider } from '@/context/schedules-context'
 import { useEffect, useState } from 'react'
 import React from 'react'
 import { useDashboard } from '@/context/dashboard-Context'
+import { addMonths, subMonths } from 'date-fns'
 
 function BookingContent({ slug }: { slug: string }) {
   const { currentTheme } = useTheme()
@@ -49,6 +50,12 @@ function BookingContent({ slug }: { slug: string }) {
   const [companyId, setCompanyId] = useState<string | null>(null)
   const dashboard = useDashboard()
   const [selectedTime, setSelectedTime] = useState<string | null>(null)
+  const [currentMonth, setCurrentMonth] = useState<number>(
+    new Date().getMonth() + 1
+  )
+  const [currentYear, setCurrentYear] = useState<number>(
+    new Date().getFullYear()
+  )
 
   // Obtener datos de la empresa basándose en el slug
   const fetchCompanyData = React.useCallback(async () => {
@@ -98,28 +105,41 @@ function BookingContent({ slug }: { slug: string }) {
   }, [fetchCompanyData, fetchCompanyId])
 
   const fetchAvailableDates = React.useCallback(
-    async (professionalId: string | null) => {
-      if (!professionalId) {
-        const res = await fetch(`${apiUrl}/availability/days`)
-        const dates = await res.json()
-        return dates.map((d: string) => new Date(d))
+    async (professionalId: string | null, month: number, year: number) => {
+      if (!month || !year) return []
+      let url = `${apiUrl}/availability/days`
+      if (professionalId) {
+        url += `/${professionalId}`
       }
-
-      const res = await fetch(`${apiUrl}/availability/days/${professionalId}`)
+      url += `?month=${month}&year=${year}`
+      if (bookingData.serviceId) {
+        url += `&serviceId=${bookingData.serviceId}`
+      }
+      const res = await fetch(url)
       const dates = await res.json()
       return dates.map((d: string) => new Date(d))
     },
-    []
+    [bookingData.serviceId]
   )
 
   useEffect(() => {
-    if (bookingData.serviceId) {
-      fetchAvailableDates(bookingData.professionalId).then((dates) => {
+    if (bookingData.serviceId && currentMonth && currentYear) {
+      fetchAvailableDates(
+        bookingData.professionalId,
+        currentMonth,
+        currentYear
+      ).then((dates) => {
         setAvailableDates(dates)
       })
       setBookingData((prev) => ({ ...prev, date: null }))
     }
-  }, [bookingData.professionalId, bookingData.serviceId, fetchAvailableDates])
+  }, [
+    bookingData.professionalId,
+    bookingData.serviceId,
+    fetchAvailableDates,
+    currentMonth,
+    currentYear
+  ])
 
   // Cargar horarios disponibles cuando se selecciona una fecha
   const fetchAvailableHours = React.useCallback(
@@ -382,6 +402,18 @@ function BookingContent({ slug }: { slug: string }) {
       )
     : professionals
 
+  const handleMonthChange = (direction: 'prev' | 'next') => {
+    if (direction === 'prev') {
+      const prev = subMonths(new Date(currentYear, currentMonth - 1), 1)
+      setCurrentMonth(prev.getMonth() + 1)
+      setCurrentYear(prev.getFullYear())
+    } else {
+      const next = addMonths(new Date(currentYear, currentMonth - 1), 1)
+      setCurrentMonth(next.getMonth() + 1)
+      setCurrentYear(next.getFullYear())
+    }
+  }
+
   // Mostrar loading hasta que companyId esté listo y sea válido
   if (
     !companyId ||
@@ -490,15 +522,22 @@ function BookingContent({ slug }: { slug: string }) {
                     <DateSelection
                       availableDates={availableDates}
                       selectedDate={
-                        typeof bookingData.date === 'string'
-                          ? new Date(bookingData.date)
-                          : bookingData.date
+                        bookingData.date
+                          ? typeof bookingData.date === 'string'
+                            ? new Date(bookingData.date)
+                            : bookingData.date
+                          : null
                       }
-                      selectedProfessional={getSelectedProfessional()}
+                      selectedProfessional={professionals.find(
+                        (p) => p.id === bookingData.professionalId
+                      )}
                       onDateSelect={handleDateSelect}
-                      onBack={() => setStep(2)}
-                      onContinue={() => setStep(4)}
+                      onBack={() => setStep(step - 1)}
+                      onContinue={() => setStep(step + 1)}
                       currentTheme={currentTheme}
+                      currentMonth={currentMonth}
+                      currentYear={currentYear}
+                      onMonthChange={handleMonthChange}
                     />
                   )}
                   {step === 4 && (

@@ -89,8 +89,14 @@ export const getSchedulesForProfessional: Controller = async (req, res) => {
 
 export const getAvailableDays: Controller = async (req, res) => {
     const { professionalId } = req.params;
-    const range = parseInt(req.query.range as string) || 30;
-    const { serviceId } = req.query;
+    const { serviceId, month, year } = req.query;
+
+    // Validar mes y año
+    const monthNum = month ? parseInt(month as string) : null;
+    const yearNum = year ? parseInt(year as string) : null;
+    if (monthNum === null || yearNum === null || isNaN(monthNum) || isNaN(yearNum)) {
+      return res.status(400).json({ message: "Se requiere month y year como query params" });
+    }
 
     try {
       let schedules;
@@ -132,11 +138,11 @@ export const getAvailableDays: Controller = async (req, res) => {
       }
 
       const availableDates: string[] = [];
-      const today = new Date();
-
-      for (let i = 0; i < range; i++) {
-        const date = new Date(today);
-        date.setDate(today.getDate() + i);
+      // Calcular primer y último día del mes
+      const firstDay = new Date(yearNum, monthNum - 1, 1);
+      const lastDay = new Date(yearNum, monthNum, 0); // último día del mes
+      for (let d = new Date(firstDay); d <= lastDay; d.setDate(d.getDate() + 1)) {
+        const date = new Date(d);
         const dayOfWeek = date.getDay();
         // Tramos para ese día
         const daySchedules = schedules.filter((s: any) => s.dayOfWeek === dayOfWeek);

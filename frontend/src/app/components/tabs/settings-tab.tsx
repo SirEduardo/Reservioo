@@ -18,14 +18,12 @@ export default function SettingsTab() {
   const { currentTheme } = useTheme()
   const { professionals } = useProfessionals()
   const { services } = useService()
-  const { schedules, scheduleProfessionals } = useSchedule()
   const { bookings } = useBookings()
   const { companyId } = useDashboard()
-  const [settings, setSettings] = useState<CompanySettings>({
+  const [settings, setSettings] = useState<any>({
     id: '1',
     companyId: 'company-1',
-    appointmentDuration: 30,
-    appointmentBuffer: 15
+    appointmentDuration: 30
   })
   const [localSettings, setLocalSettings] = useState(settings)
   const [businessSlug, setBusinessSlug] = useState('')
@@ -127,20 +125,6 @@ export default function SettingsTab() {
               step="15"
             />
 
-            <ThemedInput
-              label="Tiempo de Buffer entre Citas (minutos)"
-              type="number"
-              value={localSettings.appointmentBuffer}
-              onChange={(e) =>
-                setLocalSettings({
-                  ...localSettings,
-                  appointmentBuffer: Number(e.target.value)
-                })
-              }
-              min="0"
-              step="5"
-            />
-
             <div>
               <label
                 className="block text-sm font-medium mb-2"
@@ -218,22 +202,57 @@ export default function SettingsTab() {
                 className="flex justify-between"
                 style={{ color: currentTheme.colors.text }}
               >
-                <span>Profesionales:</span>
+                <span>Profesionales activos:</span>
                 <span className="font-semibold">{professionals.length}</span>
               </div>
               <div
                 className="flex justify-between"
                 style={{ color: currentTheme.colors.text }}
               >
-                <span>Servicios:</span>
+                <span>Servicios activos:</span>
                 <span className="font-semibold">{services.length}</span>
               </div>
               <div
                 className="flex justify-between"
                 style={{ color: currentTheme.colors.text }}
               >
-                <span>Horarios configurados:</span>
-                <span className="font-semibold">{schedules.length}</span>
+                <span>Reservas hoy:</span>
+                <span className="font-semibold">
+                  {
+                    bookings
+                      .filter((b) => b.date)
+                      .filter((b) => {
+                        const d = new Date(b.date as string)
+                        const today = new Date()
+                        return (
+                          d.getDate() === today.getDate() &&
+                          d.getMonth() === today.getMonth() &&
+                          d.getFullYear() === today.getFullYear()
+                        )
+                      }).length
+                  }
+                </span>
+              </div>
+              <div
+                className="flex justify-between"
+                style={{ color: currentTheme.colors.text }}
+              >
+                <span>Reservas esta semana:</span>
+                <span className="font-semibold">
+                  {(() => {
+                    const today = new Date()
+                    const startOfWeek = new Date(today)
+                    startOfWeek.setDate(today.getDate() - today.getDay())
+                    const endOfWeek = new Date(today)
+                    endOfWeek.setDate(today.getDate() + (6 - today.getDay()))
+                    return bookings
+                      .filter((b) => b.date)
+                      .filter((b) => {
+                        const d = new Date(b.date as string)
+                        return d >= startOfWeek && d <= endOfWeek
+                      }).length
+                  })()}
+                </span>
               </div>
               <div
                 className="flex justify-between"
@@ -246,16 +265,7 @@ export default function SettingsTab() {
                 className="flex justify-between"
                 style={{ color: currentTheme.colors.text }}
               >
-                <span>Asignaciones activas:</span>
-                <span className="font-semibold">
-                  {scheduleProfessionals.length}
-                </span>
-              </div>
-              <div
-                className="flex justify-between"
-                style={{ color: currentTheme.colors.text }}
-              >
-                <span>Precio promedio:</span>
+                <span>Precio promedio servicio:</span>
                 <span
                   className="font-semibold"
                   style={{ color: currentTheme.colors.success }}
