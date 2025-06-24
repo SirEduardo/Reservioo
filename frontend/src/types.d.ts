@@ -61,7 +61,6 @@ export interface CompanySettings {
     id: string
     companyId: string
     appointmentDuration: number
-    appointmentBuffer: number
   }
 
   export interface TimeSlot {

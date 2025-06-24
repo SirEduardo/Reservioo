@@ -19,7 +19,7 @@ export default function SettingsTab() {
   const { services } = useService()
   const { bookings } = useBookings()
   const { companyId } = useDashboard()
-  const [settings, setSettings] = useState<any>({
+  const [settings, setSettings] = useState<CompanySettings>({
     id: '1',
     companyId: 'company-1',
     appointmentDuration: 30
