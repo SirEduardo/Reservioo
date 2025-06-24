@@ -19,6 +19,8 @@ export function ServiceSelection({
   onContinue,
   currentTheme
 }: ServiceSelectionProps) {
+  console.log('ServiceSelection services:', services)
+
   return (
     <div>
       <h2

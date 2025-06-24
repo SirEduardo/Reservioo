@@ -21,6 +21,7 @@ export function ProfessionalSelection({
   onContinue,
   currentTheme
 }: ProfessionalSelectionProps) {
+  console.log('ProfessionalSelection professionals:', professionals)
   return (
     <div>
       <h2

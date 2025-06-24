@@ -2,7 +2,6 @@
 import { ThemeProvider, useTheme } from '@/context/theme-context'
 import { ThemedCard } from '@/app/components/themed/card'
 import { Booking, BusinessInfo, TimeSlot } from '@/types'
-import { useProfessionals } from '@/context/professionals-context'
 import { useService } from '@/context/services-context'
 import {
   ServiceSelection,
@@ -14,7 +13,6 @@ import {
   BookingHeader
 } from '@/app/components/booking'
 import { apiUrl } from '@/app/api/apiUrl'
-import { ProfessionalsProvider } from '@/context/professionals-context'
 import { ServiceProvider } from '@/context/services-context'
 import { ScheduleProvider } from '@/context/schedules-context'
 import { useEffect, useState } from 'react'
@@ -24,13 +22,8 @@ import { addMonths, subMonths } from 'date-fns'
 
 function BookingContent({ slug }: { slug: string }) {
   const { currentTheme } = useTheme()
-  const { professionals, loading: loadingProfessionals } = useProfessionals()
-  const {
-    services,
-    professionalServices,
-    loading: loadingServices
-  } = useService()
   const [step, setStep] = useState(1)
+  console.log('step inicial', step)
   const [bookingData, setBookingData] = useState<Booking>({
     id: '',
     companyId: '',
@@ -355,10 +348,12 @@ function BookingContent({ slug }: { slug: string }) {
   }
 
   const getSelectedService = () =>
-    services.find((s) => s.id === bookingData.serviceId)
+    companyData?.services.find((s) => s.id === bookingData.serviceId)
   const getSelectedProfessional = () => {
     if (!bookingData.professionalId) return null
-    return professionals.find((p) => p.id === bookingData.professionalId)
+    return companyData?.professionals.find(
+      (p) => p.id === bookingData.professionalId
+    )
   }
 
   const handleNewBooking = () => {
@@ -366,15 +361,14 @@ function BookingContent({ slug }: { slug: string }) {
   }
 
   // filtro de profesionales
-  const filteredProfessionals = bookingData.serviceId
-    ? professionals.filter((pro) =>
-        professionalServices.some(
-          (ps) =>
-            ps.professionalId === pro.id &&
-            ps.serviceId === bookingData.serviceId
+  const filteredProfessionals =
+    companyData && bookingData.serviceId
+      ? companyData.professionals.filter((pro: any) =>
+          pro.services.some((s: any) => s.id === bookingData.serviceId)
         )
-      )
-    : professionals
+      : companyData && companyData.professionals
+      ? companyData.professionals
+      : []
 
   const handleMonthChange = (direction: 'prev' | 'next') => {
     if (direction === 'prev') {
@@ -415,25 +409,9 @@ function BookingContent({ slug }: { slug: string }) {
     setStep(5)
   }
 
-  // Mostrar loading hasta que companyId esté listo y sea válido
-  if (
-    !companyId ||
-    companyId === 'null' ||
-    companyId === 'undefined' ||
-    companyId === ''
-  ) {
-    return (
-      <div
-        style={{
-          minHeight: '100vh',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center'
-        }}
-      >
-        Cargando datos de la empresa...
-      </div>
-    )
+  console.log('Render principal', { step, companyData })
+  if (!companyData) {
+    return <div>Cargando datos de la empresa...</div>
   }
 
   console.log(bookingData)
@@ -465,121 +443,113 @@ function BookingContent({ slug }: { slug: string }) {
     )
   }
 
-  if (loadingProfessionals || loadingServices) {
-    return (
-      <div
-        style={{
-          minHeight: '100vh',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center'
-        }}
-      >
-        Cargando datos de la empresa...
-      </div>
-    )
-  }
-
   return (
-    <ProfessionalsProvider companyId={companyId}>
-      <ServiceProvider companyId={companyId}>
-        <ScheduleProvider companyId={companyId}>
-          <ThemeProvider>
-            <div
-              className="min-h-screen p-4"
-              style={{ background: currentTheme.colors.background }}
-            >
-              <div className="max-w-2xl mx-auto pt-20">
-                <ThemedCard>
-                  {companyData && (
-                    <BookingHeader
-                      currentStep={step}
-                      businessInfo={companyData}
-                      currentTheme={currentTheme}
-                    />
-                  )}
-                  {step === 1 && (
-                    <ServiceSelection
-                      services={services}
-                      selectedServiceId={bookingData.serviceId}
-                      onServiceSelect={handleServiceSelect}
-                      onContinue={() => setStep(2)}
-                      currentTheme={currentTheme}
-                    />
-                  )}
-                  {step === 2 && (
-                    <ProfessionalSelection
-                      professionals={filteredProfessionals}
-                      selectedProfessionalId={bookingData.professionalId}
-                      onProfessionalSelect={(professionalId) =>
-                        handleProfessionalSelect(professionalId)
-                      }
-                      onBack={() => setStep(1)}
-                      onContinue={() => setStep(3)}
-                      currentTheme={currentTheme}
-                    />
-                  )}
-                  {step === 3 && (
-                    <DateSelection
-                      availableDates={availableDates}
-                      selectedDate={
-                        bookingData.date
-                          ? typeof bookingData.date === 'string'
-                            ? new Date(bookingData.date)
-                            : bookingData.date
-                          : null
-                      }
-                      selectedProfessional={professionals.find(
-                        (p) => p.id === bookingData.professionalId
-                      )}
-                      onDateSelect={handleDateSelect}
-                      onBack={() => setStep(step - 1)}
-                      onContinue={() => setStep(step + 1)}
-                      currentTheme={currentTheme}
-                      currentMonth={currentMonth}
-                      currentYear={currentYear}
-                      onMonthChange={handleMonthChange}
-                    />
-                  )}
-                  {step === 4 && (
-                    <TimeSelection
-                      availableSlots={availableSlots}
-                      selectedTime={selectedTime}
-                      selectedProfessionalId={bookingData.professionalId}
-                      isLoadingSlots={isLoadingSlots}
-                      onTimeSelect={handleTimeSelect}
-                      onBack={() => setStep(3)}
-                      onContinue={handleTimeContinue}
-                      onBackToDate={() => setStep(3)}
-                      onBackToProfessional={() => setStep(2)}
-                      currentTheme={currentTheme}
-                    />
-                  )}
-                  {step === 5 && (
-                    <PersonalDataForm
-                      bookingData={{
-                        ...bookingData,
-                        date:
-                          typeof bookingData.date === 'string'
-                            ? new Date(bookingData.date)
-                            : bookingData.date
-                      }}
-                      selectedService={getSelectedService()}
-                      selectedProfessional={getSelectedProfessional()}
-                      isLoading={isLoading}
-                      onInputChange={handleInputChange}
-                      onSubmit={handleSubmit}
-                      onBack={() => setStep(4)}
-                      currentTheme={currentTheme}
-                    />
-                  )}
-                </ThemedCard>
-              </div>
-            </div>
-          </ThemeProvider>
-        </ScheduleProvider>
-      </ServiceProvider>
-    </ProfessionalsProvider>
+    <ThemeProvider>
+      <div
+        className="min-h-screen p-4"
+        style={{ background: currentTheme.colors.background }}
+      >
+        <div className="max-w-2xl mx-auto pt-20">
+          <ThemedCard>
+            {companyData && (
+              <BookingHeader
+                currentStep={step}
+                businessInfo={companyData}
+                currentTheme={currentTheme}
+              />
+            )}
+            {step === 1 && companyData && (
+              <ServiceSelection
+                services={companyData.services}
+                selectedServiceId={bookingData.serviceId}
+                onServiceSelect={handleServiceSelect}
+                onContinue={() => setStep(2)}
+                currentTheme={currentTheme}
+              />
+            )}
+            {step === 2 && companyData && (
+              <ProfessionalSelection
+                professionals={filteredProfessionals}
+                selectedProfessionalId={bookingData.professionalId}
+                onProfessionalSelect={handleProfessionalSelect}
+                onBack={() => setStep(1)}
+                onContinue={() => setStep(3)}
+                currentTheme={currentTheme}
+              />
+            )}
+            {step === 3 && (
+              <DateSelection
+                availableDates={availableDates}
+                selectedDate={
+                  bookingData.date
+                    ? typeof bookingData.date === 'string'
+                      ? new Date(bookingData.date)
+                      : bookingData.date
+                    : null
+                }
+                selectedProfessional={
+                  companyData &&
+                  companyData.professionals.find(
+                    (p: any) => p.id === bookingData.professionalId
+                  )
+                }
+                onDateSelect={handleDateSelect}
+                onBack={() => setStep(step - 1)}
+                onContinue={() => setStep(step + 1)}
+                currentTheme={currentTheme}
+                currentMonth={currentMonth}
+                currentYear={currentYear}
+                onMonthChange={handleMonthChange}
+              />
+            )}
+            {step === 4 && (
+              <TimeSelection
+                availableSlots={availableSlots}
+                selectedTime={selectedTime}
+                selectedProfessionalId={bookingData.professionalId}
+                isLoadingSlots={isLoadingSlots}
+                onTimeSelect={handleTimeSelect}
+                onBack={() => setStep(3)}
+                onContinue={handleTimeContinue}
+                onBackToDate={() => setStep(3)}
+                onBackToProfessional={() => setStep(2)}
+                currentTheme={currentTheme}
+              />
+            )}
+            {step === 5 && (
+              <PersonalDataForm
+                bookingData={{
+                  ...bookingData,
+                  date:
+                    typeof bookingData.date === 'string'
+                      ? new Date(bookingData.date)
+                      : bookingData.date
+                }}
+                selectedService={
+                  companyData
+                    ? companyData.services.find(
+                        (s: any) => s.id === bookingData.serviceId
+                      )
+                    : undefined
+                }
+                selectedProfessional={
+                  companyData
+                    ? companyData.professionals.find(
+                        (p: any) => p.id === bookingData.professionalId
+                      )
+                    : undefined
+                }
+                isLoading={isLoading}
+                onInputChange={handleInputChange}
+                onSubmit={handleSubmit}
+                onBack={() => setStep(4)}
+                currentTheme={currentTheme}
+              />
+            )}
+          </ThemedCard>
+        </div>
+      </div>
+    </ThemeProvider>
   )
 }
 
