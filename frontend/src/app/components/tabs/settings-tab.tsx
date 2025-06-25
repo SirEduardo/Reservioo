@@ -258,7 +258,17 @@ export default function SettingsTab() {
                 style={{ color: currentTheme.colors.text }}
               >
                 <span>Reservas totales del mes:</span>
-                <span className="font-semibold">{bookings.length}</span>
+                <span className="font-semibold">
+                  {
+                    bookings.filter(
+                      (b) =>
+                        b.date &&
+                        new Date(b.date).getMonth() === new Date().getMonth() &&
+                        new Date(b.date).getFullYear() ===
+                          new Date().getFullYear()
+                    ).length
+                  }
+                </span>
               </div>
               <div
                 className="flex justify-between"

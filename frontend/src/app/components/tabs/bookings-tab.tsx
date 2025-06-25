@@ -24,7 +24,10 @@ export default function BookingTab() {
   const [mesSeleccionado, setMesSeleccionado] = useState(new Date())
   const esMesActual = isSameMonth(mesSeleccionado, new Date())
 
-  const reservasDelMes = bookings.filter(
+  const nextBookings = bookings.filter(
+    (booking) => booking.date && booking.date >= new Date()
+  )
+  const reservasDelMes = nextBookings.filter(
     (booking) => booking.date && isSameMonth(booking.date, mesSeleccionado)
   )
 
