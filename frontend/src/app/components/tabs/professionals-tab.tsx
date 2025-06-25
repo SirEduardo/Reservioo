@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Plus, Edit, Trash2, Users, User } from 'lucide-react'
+import { Plus, Trash2, Users, User } from 'lucide-react'
 import { useTheme } from '@/context/theme-context'
 import { useProfessionals } from '@/context/professionals-context'
 import { ThemedCard } from '../themed/card'
