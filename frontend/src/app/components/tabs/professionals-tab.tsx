@@ -32,29 +32,34 @@ export default function ProfessionalsTab() {
   return (
     <div className="space-y-6">
       <ThemedCard
-        className="p-6"
+        className="p-4 sm:p-6"
         style={{ background: currentTheme.gradients.background }}
       >
-        <h2
-          className="text-xl font-bold mb-6 flex items-center gap-2"
-          style={{ color: currentTheme.colors.text }}
-        >
+        <div className="flex items-center gap-2 mb-4 sm:mb-6">
           <Users
-            className="h-6 w-6"
+            className="hidden sm:block h-6 w-6"
             style={{ color: currentTheme.colors.primary }}
           />
-          ✨ Agregar Nuevo Profesional
-        </h2>
-        <div className="flex flex-col sm:flex-row gap-4 items-end">
-          <div className="flex-1">
-            <ThemedInput
-              label="Nombre del Profesional"
-              value={newProfessional.name}
-              onChange={(e) => setNewProfessional({ name: e.target.value })}
-              placeholder="Ej: María García"
-            />
-          </div>
-          <ThemedButton onClick={handleAddInput} size="lg">
+          <h2
+            className="text-lg font-bold sm:text-xl"
+            style={{ color: currentTheme.colors.text }}
+          >
+            ✨ Agregar Nuevo Profesional
+          </h2>
+        </div>
+        <div className="flex gap-2 items-end">
+          <ThemedInput
+            label="Nombre del Profesional"
+            value={newProfessional.name}
+            onChange={(e) => setNewProfessional({ name: e.target.value })}
+            placeholder="Ej: María García"
+            className="flex-1"
+          />
+          <ThemedButton
+            onClick={handleAddInput}
+            size="lg"
+            className="w-auto h-[42px]"
+          >
             <Plus className="h-5 w-5" />
             Agregar
           </ThemedButton>
@@ -63,49 +68,42 @@ export default function ProfessionalsTab() {
 
       <div className="grid gap-4">
         {professionals.map((professional) => (
-          <ThemedCard key={professional.id} hover className="p-6">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4 min-w-0 flex-1">
-                <div
-                  className="w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg"
-                  style={{ background: currentTheme.gradients.primary }}
+          <ThemedCard key={professional.id} hover className="p-4 sm:p-6">
+            <div className="flex items-center gap-3">
+              <div
+                className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center shadow-lg"
+                style={{ background: currentTheme.gradients.primary }}
+              >
+                <User className="h-7 w-7 text-white" />
+              </div>
+              <div className="min-w-0 flex-1 cursor-pointer">
+                <h3
+                  className="font-semibold truncate text-base sm:text-lg"
+                  style={{ color: currentTheme.colors.text }}
                 >
-                  <User className="h-7 w-7 text-white" />
-                </div>
-                <div className="min-w-0 flex-1 cursor-pointer">
-                  <h3
-                    className="font-semibold text-base truncate"
-                    style={{ color: currentTheme.colors.text }}
-                  >
-                    {professional.name}
-                  </h3>
-                  <div className="flex items-center gap-2 mt-1">
-                    <ThemedBadge variant="primary">
-                      {
-                        bookings.filter(
-                          (b) =>
-                            b.professionalId === professional.id &&
-                            b.date &&
-                            b.date > new Date()
-                        ).length
-                      }{' '}
-                      citas próximas
-                    </ThemedBadge>
-                  </div>
+                  {professional.name}
+                </h3>
+                <div className="flex items-center gap-2 mt-1">
+                  <ThemedBadge variant="primary">
+                    {
+                      bookings.filter(
+                        (b) =>
+                          b.professionalId === professional.id &&
+                          b.date &&
+                          b.date > new Date()
+                      ).length
+                    }{' '}
+                    citas próximas
+                  </ThemedBadge>
                 </div>
               </div>
-              <div className="flex gap-2">
-                <ThemedButton variant="ghost" size="sm">
-                  <Edit className="h-4 w-4" />
-                </ThemedButton>
-                <button
-                  onClick={() => handleDeleteProfessional(professional.id)}
-                  className="p-3 text-red-500 hover:bg-red-50 rounded-lg transition-all duration-300 cursor-pointer"
-                  aria-label="Eliminar reserva"
-                >
-                  <Trash2 className="h-5 w-5" />
-                </button>
-              </div>
+              <button
+                onClick={() => handleDeleteProfessional(professional.id)}
+                className="p-2 sm:p-3 text-red-500 hover:bg-red-50 rounded-lg transition-all duration-300 cursor-pointer ml-2"
+                aria-label="Eliminar reserva"
+              >
+                <Trash2 className="h-5 w-5" />
+              </button>
             </div>
           </ThemedCard>
         ))}

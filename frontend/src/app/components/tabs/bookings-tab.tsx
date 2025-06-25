@@ -3,7 +3,14 @@
 import { useState } from 'react'
 import { format, isSameMonth, addMonths, subMonths } from 'date-fns'
 import { es } from 'date-fns/locale'
-import { Calendar, Clock, Mail, Trash2, AlertCircle } from 'lucide-react'
+import {
+  Calendar,
+  Clock,
+  Mail,
+  Trash2,
+  AlertCircle,
+  RefreshCw
+} from 'lucide-react'
 import { useProfessionals } from '@/context/professionals-context'
 import { useService } from '@/context/services-context'
 import { useBookings } from '@/context/bookings-context'
@@ -72,7 +79,6 @@ export default function BookingTab() {
             <p className="text-red-600 font-medium mb-2">
               Error al cargar reservas
             </p>
-            <p className="text-gray-600 text-sm mb-4">{error}</p>
             <button
               onClick={fetchBookings}
               className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
@@ -158,14 +164,15 @@ export default function BookingTab() {
       </div>
 
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
+        <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
           <Calendar className="h-5 w-5 text-blue-600" />
           Reservas de {format(mesSeleccionado, 'MMMM', { locale: es })}
         </h2>
         <button
           onClick={fetchBookings}
-          className="text-sm text-blue-600 hover:text-blue-800 transition-colors"
+          className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800 transition-colors"
         >
+          <RefreshCw className="h-4 w-4" />
           Actualizar
         </button>
       </div>
@@ -194,9 +201,18 @@ export default function BookingTab() {
                     {booking.name.charAt(0)}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="font-medium text-gray-900 text-sm sm:text-base truncate">
-                      {booking.name}
-                    </p>
+                    <div className="flex relative">
+                      <p className="font-semibold text-gray-900 text-sm sm:text-base truncate">
+                        {booking.name}
+                      </p>
+                      <button
+                        onClick={() => handleDeleteBooking(booking.id)}
+                        className={`block sm:hidden absolute right-0 top-0 rounded-lg ${'text-red-500'}`}
+                        aria-label="Eliminar reserva"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
                     <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600 mt-1">
                       <Mail className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
                       <span className="truncate">{booking.email}</span>
@@ -213,7 +229,28 @@ export default function BookingTab() {
                       <span className="text-xs sm:text-sm bg-blue-100 text-blue-800 px-3 py-1 rounded-lg inline-block font-medium">
                         {getProfessionalName(booking.professionalId)}
                       </span>
-                      <span className="text-m font-semibold text-green-600">
+                      <span className="text-m font-semibold text-green-600 sm:block hidden">
+                        {getServicePrice(booking.serviceId)}€
+                      </span>
+                    </div>
+                    <div className="sm:hidden flex items-center justify-between pt-2">
+                      <div className="text-sm font-medium text-gray-900">
+                        {booking.date
+                          ? format(booking.date, 'EEEE, d MMMM', { locale: es })
+                          : 'Fecha no definida'}
+                      </div>
+                      <div className="text-sm text-gray-600 flex items-center gap-1 sm:justify-end">
+                        <Clock className="h-3 w-3" />
+                        {(() => {
+                          if (!booking.date) return 'Hora no definida'
+                          if (typeof booking.date === 'string')
+                            return booking.date.slice(11, 16)
+                          if (booking.date instanceof Date)
+                            return booking.date.toISOString().slice(11, 16)
+                          return String(booking.date).slice(11, 16)
+                        })()}
+                      </div>
+                      <span className="text-m font-semibold text-green-600 ml-2">
                         {getServicePrice(booking.serviceId)}€
                       </span>
                     </div>
@@ -221,7 +258,7 @@ export default function BookingTab() {
                 </div>
 
                 <div className="flex items-center justify-between sm:justify-end gap-4 sm:gap-4">
-                  <div className="text-left sm:text-right">
+                  <div className="text-left sm:text-right hidden sm:block">
                     <div className="text-sm font-medium text-gray-900">
                       {booking.date
                         ? format(booking.date, 'EEEE, d MMMM', { locale: es })
@@ -235,14 +272,13 @@ export default function BookingTab() {
                           return booking.date.slice(11, 16)
                         if (booking.date instanceof Date)
                           return booking.date.toISOString().slice(11, 16)
-                        // fallback para cualquier otro tipo
                         return String(booking.date).slice(11, 16)
                       })()}
                     </div>
                   </div>
                   <button
                     onClick={() => handleDeleteBooking(booking.id)}
-                    className={`p-3 rounded-lg transition-all duration-300 cursor-pointer ${'text-red-500 hover:bg-red-50'}`}
+                    className={`hidden sm:block p-3 rounded-lg transition-all duration-300 cursor-pointer ${'text-red-500 hover:bg-red-50'}`}
                     aria-label="Eliminar reserva"
                   >
                     <Trash2 className="h-5 w-5" />
@@ -267,42 +303,6 @@ export default function BookingTab() {
           </div>
         )}
       </div>
-
-      {/* Estadísticas */}
-      {bookings.length > 0 && (
-        <div className="mt-6 sm:mt-8 grid md:grid-cols-1 gap-6">
-          <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-            <h3 className="font-medium text-blue-900 mb-3 flex items-center gap-2 text-sm sm:text-base">
-              <Calendar className="h-4 w-4" />
-              Estadísticas de Reservas
-            </h3>
-            <div className="grid grid-cols-3 gap-2 sm:gap-4 text-xs sm:text-sm">
-              <div className="text-center">
-                <div className="text-lg sm:text-lg font-bold text-blue-800">
-                  {
-                    bookings.filter(
-                      (r) => r.date && isSameMonth(r.date, new Date())
-                    ).length
-                  }
-                </div>
-                <div className="text-blue-600 text-xs sm:text-sm">Este mes</div>
-              </div>
-              <div className="text-center">
-                <div className="text-lg sm:text-lg font-bold text-blue-800">
-                  {bookings.filter((r) => r.date && r.date > new Date()).length}
-                </div>
-                <div className="text-blue-600 text-xs sm:text-sm">Próximas</div>
-              </div>
-              <div className="text-center">
-                <div className="text-lg sm:text-lg font-bold text-blue-800">
-                  {bookings.length}
-                </div>
-                <div className="text-blue-600 text-xs sm:text-sm">Total</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </section>
   )
 }

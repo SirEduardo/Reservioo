@@ -51,11 +51,11 @@ export default function ServicesTab() {
   return (
     <div className="space-y-6">
       <ThemedCard
-        className="p-6"
+        className="p-4 sm:p-6"
         style={{ background: currentTheme.gradients.background }}
       >
         <h2
-          className="text-xl font-bold mb-6 flex items-center gap-2"
+          className="text-lg sm:text-xl font-bold mb-4 sm:mb-6 flex items-center gap-2"
           style={{ color: currentTheme.colors.text }}
         >
           <Briefcase
@@ -64,7 +64,7 @@ export default function ServicesTab() {
           />
           🎨 Crear Nuevo Servicio
         </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           <div className="sm:col-span-2 lg:col-span-1">
             <ThemedInput
               label="Nombre del Servicio"
@@ -73,6 +73,7 @@ export default function ServicesTab() {
                 setNewService({ ...newService, name: e.target.value })
               }
               placeholder="Ej: Corte de Cabello"
+              className="w-full"
             />
           </div>
           <div>
@@ -88,6 +89,7 @@ export default function ServicesTab() {
               }
               min="15"
               step="15"
+              className="w-full"
             />
           </div>
           <div>
@@ -100,13 +102,11 @@ export default function ServicesTab() {
               }
               min="0"
               step="0.01"
+              className="w-full"
             />
           </div>
           <div className="sm:col-span-2 lg:col-span-1 flex items-end">
-            <ThemedButton
-              onClick={handleAdd}
-              className="w-full  cursor-pointer"
-            >
+            <ThemedButton onClick={handleAdd} className="w-full cursor-pointer">
               <Plus className="h-5 w-5" />
               Crear
             </ThemedButton>
@@ -116,42 +116,38 @@ export default function ServicesTab() {
 
       <div className="grid gap-4">
         {services.map((service) => (
-          <ThemedCard key={service.id} hover className="p-6">
-            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between mb-4 gap-4">
-              <div className="min-w-0 flex-1">
-                <h3
-                  className="font-semibold text-lg"
-                  style={{ color: currentTheme.colors.text }}
+          <ThemedCard key={service.id} hover className="p-4 sm:p-6 relative">
+            <button
+              onClick={() => handleDeleteService(service.id)}
+              className="absolute top-3 right-3 p-2 sm:p-3 text-red-500 hover:bg-red-50 rounded-lg transition-all duration-300 cursor-pointer"
+              aria-label="Eliminar reserva"
+            >
+              <Trash2 className="h-5 w-5" />
+            </button>
+            <div className="min-w-0 flex-1 mb-4">
+              <h3
+                className="font-semibold text-base sm:text-lg"
+                style={{ color: currentTheme.colors.text }}
+              >
+                {service.name}
+              </h3>
+              <div className="flex flex-wrap items-center gap-2 sm:gap-4 mt-2">
+                <ThemedBadge variant="neutral">
+                  <Clock className="h-3 w-3 mr-1" />
+                  {service.duration} min
+                </ThemedBadge>
+                <span
+                  className="text-base sm:text-lg font-semibold"
+                  style={{ color: currentTheme.colors.success }}
                 >
-                  {service.name}
-                </h3>
-                <div className="flex items-center gap-4 mt-2">
-                  <ThemedBadge variant="neutral">
-                    <Clock className="h-3 w-3 mr-1" />
-                    {service.duration} min
-                  </ThemedBadge>
-                  <span
-                    className="text-lg font-semibold"
-                    style={{ color: currentTheme.colors.success }}
-                  >
-                    {service.price}€
-                  </span>
-                </div>
-              </div>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => handleDeleteService(service.id)}
-                  className="p-3 text-red-500 hover:bg-red-50 rounded-lg transition-all duration-300 cursor-pointer"
-                  aria-label="Eliminar reserva"
-                >
-                  <Trash2 className="h-5 w-5" />
-                </button>
+                  {service.price}€
+                </span>
               </div>
             </div>
 
             <div>
               <h4
-                className="font-medium mb-3"
+                className="font-medium mb-2 sm:mb-3"
                 style={{ color: currentTheme.colors.text }}
               >
                 Asignar/Desasignar Profesionales:
@@ -159,7 +155,7 @@ export default function ServicesTab() {
               <div className="flex flex-wrap gap-2">
                 {professionals.map((professional) => (
                   <ThemedButton
-                    className="cursor-pointer"
+                    className="cursor-pointer text-xs sm:text-sm px-2 sm:px-3 py-1 sm:py-1.5"
                     key={professional.id}
                     variant={
                       isProfessionalAssignedToService(

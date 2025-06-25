@@ -108,7 +108,7 @@ export default function SchedulesTab() {
         style={{ background: currentTheme.gradients.background }}
       >
         <h2
-          className="text-xl font-bold mb-6 flex items-center gap-2"
+          className="text-lg sm:text-xl font-bold mb-6 flex items-center gap-2"
           style={{ color: currentTheme.colors.text }}
         >
           <AlarmClock
@@ -211,7 +211,7 @@ export default function SchedulesTab() {
                       }}
                     >
                       {/* Información del horario */}
-                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                      <div className="flex flex-row items-center justify-between gap-3">
                         <div className="flex flex-col sm:flex-row sm:items-center gap-3">
                           <div className="flex items-center gap-2">
                             <Clock
@@ -226,18 +226,13 @@ export default function SchedulesTab() {
                             </span>
                           </div>
                         </div>
-                        <div className="flex gap-2">
-                          <ThemedButton variant="ghost" size="sm">
-                            <Edit className="h-4 w-4" />
-                          </ThemedButton>
-                          <button
-                            onClick={() => deleteSchedule(schedule.id)}
-                            className="p-3 text-red-500 hover:bg-red-50 rounded-lg transition-all duration-300 cursor-pointer"
-                            aria-label="Eliminar reserva"
-                          >
-                            <Trash2 className="h-5 w-5" />
-                          </button>
-                        </div>
+                        <button
+                          onClick={() => deleteSchedule(schedule.id)}
+                          className="p-3 text-red-500 hover:bg-red-50 rounded-lg transition-all duration-300 cursor-pointer"
+                          aria-label="Eliminar reserva"
+                        >
+                          <Trash2 className="h-5 w-5" />
+                        </button>
                       </div>
                       {/* Asignación de profesionales */}
                       <div>
