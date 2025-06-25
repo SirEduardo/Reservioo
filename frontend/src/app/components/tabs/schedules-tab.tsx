@@ -1,15 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import {
-  Plus,
-  Edit,
-  Trash2,
-  AlarmClock,
-  Calendar,
-  Clock,
-  Check
-} from 'lucide-react'
+import { Plus, Trash2, AlarmClock, Calendar, Clock, Check } from 'lucide-react'
 
 import { useTheme } from '@/context/theme-context'
 import { useSchedule } from '@/context/schedules-context'

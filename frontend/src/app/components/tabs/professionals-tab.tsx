@@ -14,7 +14,6 @@ export default function ProfessionalsTab() {
   const { currentTheme } = useTheme()
   const {
     loading,
-    error,
     professionals,
     handleAddProfessional,
     handleDeleteProfessional
@@ -27,7 +26,6 @@ export default function ProfessionalsTab() {
     setNewProfessional({ name: '' })
   }
   if (loading) return <p>Cargando profesionales...</p>
-  if (error) return <p>{error}</p>
 
   return (
     <div className="space-y-6">
