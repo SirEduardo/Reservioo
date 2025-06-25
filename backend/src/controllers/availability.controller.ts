@@ -1,10 +1,10 @@
-import { Request, Response } from 'express'
 import { PrismaClient } from '@prisma/client'
+import { Controller } from '../types'
 
 const prisma = new PrismaClient()
 
 // Obtener días disponibles
-export const getAvailableDays = async (req: Request, res: Response) => {
+export const getAvailableDays: Controller = async (req, res) => {
   try {
     const { professionalId } = req.params
     const today = new Date()
@@ -31,9 +31,8 @@ export const getAvailableDays = async (req: Request, res: Response) => {
 }
 
 // Obtener horarios disponibles
-export const getAvailableHours = async (req: Request, res: Response) => {
+export const getAvailableHours: Controller = async (req, res) => {
   try {
-    const { professionalId } = req.params
     const { date } = req.query
 
     if (!date) {
@@ -44,7 +43,8 @@ export const getAvailableHours = async (req: Request, res: Response) => {
     const availableHours = [
       '09:00', '09:30', '10:00', '10:30', '11:00', '11:30',
       '12:00', '12:30', '13:00', '13:30', '14:00', '14:30',
-      '15:00', '15:30', '16:00', '16:30', '17:00', '17:30'
+      '15:00', '15:30', '16:00', '16:30', '17:00', '17:30',
+      '18:00', '18:30', '19:00', '19:30', '20:00'
     ]
 
     res.json(availableHours)
@@ -55,7 +55,7 @@ export const getAvailableHours = async (req: Request, res: Response) => {
 }
 
 // Obtener profesionales disponibles
-export const getAvailableProfessionals = async (req: Request, res: Response) => {
+export const getAvailableProfessionals: Controller = async (req, res) => {
   try {
     const { date, time } = req.query
 
@@ -63,7 +63,6 @@ export const getAvailableProfessionals = async (req: Request, res: Response) => 
       return res.status(400).json({ error: 'Date and time parameters are required' })
     }
 
-    // Obtener todos los profesionales (simulado)
     const professionals = await prisma.professional.findMany({
       take: 5 // Limitar a 5 profesionales para simular disponibilidad
     })

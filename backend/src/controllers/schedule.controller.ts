@@ -173,7 +173,7 @@ export const getAvailableDays: Controller = async (req, res) => {
           });
         }
 
-        // Calcular todos los slots posibles de todos los tramos
+        // Calcular todos los slots posibles de todos los turnos
         let slots: string[] = [];
         for (const schedule of daySchedules) {
           slots = slots.concat(calculateSlots(schedule.startTime, schedule.endTime, 30));
@@ -232,7 +232,7 @@ export const getAvailableDays: Controller = async (req, res) => {
               return false;
             }
           }
-          // Además, ¿el slotEnd está dentro de algún tramo horario?
+          // Además, vemos si el slotEnd está dentro de algún tramo horario
           let slotEndIsInSchedule = false;
           for (const schedule of daySchedules) {
             const [endH, endM] = schedule.endTime.split(":").map(Number);

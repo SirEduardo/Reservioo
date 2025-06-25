@@ -82,8 +82,7 @@ export const createBookingAuto: Controller = async (req, res) => {
       return res.status(400).json({ message: "No hay profesionales disponibles" });
     }
   
-    const assignedProfessionalId = professionals[0]; // elige el primero, o puedes randomizar
-  
+    const assignedProfessionalId = professionals[0]; // elige el primer profesional que encuentre
     const booking = await prisma.booking.create({
       data: {
         companyId,
