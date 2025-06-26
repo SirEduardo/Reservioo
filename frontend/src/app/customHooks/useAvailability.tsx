@@ -1,5 +1,5 @@
 import { Booking, TimeSlot } from '@/types'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { apiUrl } from '../api/apiUrl'
 
 export function useAvailability(
@@ -51,7 +51,7 @@ export function useAvailability(
         setAvailableSlots(
           times.map((t: string) => ({ time: t, available: true }))
         )
-      } catch (error) {
+      } catch {
         console.error('Error al obtener horarios')
       } finally {
         setIsLoadingSlots(false)
