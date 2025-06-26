@@ -35,7 +35,7 @@ export function TimeSelection({
 
   return (
     <div className="max-w-4xl mx-auto px-3">
-      {/* Header compacto */}
+      {/* Header */}
       <div className="text-center mb-4">
         <div className="flex items-center justify-center mb-2">
           <Clock
@@ -183,7 +183,7 @@ export function TimeSelection({
         )}
       </div>
 
-      {/* Hora seleccionada - compacta */}
+      {/* Hora seleccionada */}
       {selectedTime && (
         <div
           className="text-center mb-4 p-3 rounded-lg"
@@ -207,7 +207,6 @@ export function TimeSelection({
         </div>
       )}
 
-      {/* Botones de navegación compactos */}
       <div className="flex justify-between gap-2 sm:gap-0">
         <ThemedButton
           variant="outline"

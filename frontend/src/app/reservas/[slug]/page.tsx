@@ -1,7 +1,7 @@
 'use client'
 import { ThemeProvider, useTheme } from '@/context/theme-context'
 import { ThemedCard } from '@/app/components/themed/card'
-import { Booking, BusinessInfo, Professional, Service, TimeSlot } from '@/types'
+import { Booking, Professional, Service } from '@/types'
 import {
   ServiceSelection,
   ProfessionalSelection,
@@ -12,15 +12,16 @@ import {
   BookingHeader
 } from '@/app/components/booking'
 import { apiUrl } from '@/app/api/apiUrl'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import React from 'react'
 import { useDashboard } from '@/context/dashboard-Context'
 import { addMonths, subMonths } from 'date-fns'
+import { useAvailability } from '@/app/customHooks/useAvailability'
+import { useCompanyData } from '@/app/customHooks/useCompanyData'
 
 function BookingContent({ slug }: { slug: string }) {
   const { currentTheme } = useTheme()
   const [step, setStep] = useState(1)
-  console.log('step inicial', step)
   const [bookingData, setBookingData] = useState<Booking>({
     id: '',
     companyId: '',
@@ -31,12 +32,8 @@ function BookingContent({ slug }: { slug: string }) {
     email: '',
     phone: ''
   })
-  const [availableDates, setAvailableDates] = useState<Date[]>([])
-  const [availableSlots, setAvailableSlots] = useState<TimeSlot[]>([])
   const [isSubmitted, setIsSubmitted] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
-  const [isLoadingSlots, setIsLoadingSlots] = useState(false)
-  const [companyData, setCompanyData] = useState<BusinessInfo | null>(null)
   const dashboard = useDashboard()
   const [selectedTime, setSelectedTime] = useState<string | null>(null)
   const [currentMonth, setCurrentMonth] = useState<number>(
@@ -45,177 +42,13 @@ function BookingContent({ slug }: { slug: string }) {
   const [currentYear, setCurrentYear] = useState<number>(
     new Date().getFullYear()
   )
-
-  // Obtener datos de la empresa basándose en el slug
-  const fetchCompanyData = React.useCallback(async () => {
-    try {
-      const response = await fetch(`${apiUrl}/book/${slug}/data`)
-
-      if (response.ok) {
-        const data = await response.json()
-        setCompanyData(data)
-        console.log('companyData', data)
-      } else {
-        const errorText = await response.text()
-        console.error(
-          'Error en fetchCompanyData:',
-          response.status,
-          response.statusText,
-          errorText
-        )
-      }
-    } catch (error) {
-      console.error('Error al cargar datos de la empresa:', error)
-    }
-  }, [slug])
-
-  // Obtener companyId por slug
-  const fetchCompanyId = React.useCallback(async () => {
-    try {
-      const response = await fetch(`${apiUrl}/public/company-by-slug/${slug}`)
-      if (response.ok) {
-        const data = await response.json()
-        let cleanId = data.companyId
-        if (typeof cleanId === 'string') {
-          cleanId = cleanId.replace(/[[\]]/g, '')
-        }
-      } else {
-      }
-    } catch {}
-  }, [slug])
-
-  useEffect(() => {
-    fetchCompanyData()
-    fetchCompanyId()
-  }, [fetchCompanyData, fetchCompanyId])
-
-  const fetchAvailableDates = React.useCallback(
-    async (professionalId: string | null, month: number, year: number) => {
-      if (!month || !year) return []
-      let url = `${apiUrl}/availability/days`
-      if (professionalId) {
-        url += `/${professionalId}`
-      }
-      url += `?month=${month}&year=${year}`
-      if (bookingData.serviceId) {
-        url += `&serviceId=${bookingData.serviceId}`
-      }
-      const res = await fetch(url)
-      const dates = await res.json()
-      return dates.map((d: string) => new Date(d))
-    },
-    [bookingData.serviceId]
-  )
-
-  useEffect(() => {
-    if (bookingData.serviceId && currentMonth && currentYear) {
-      fetchAvailableDates(
-        bookingData.professionalId,
-        currentMonth,
-        currentYear
-      ).then((dates) => {
-        setAvailableDates(dates)
-      })
-      setBookingData((prev) => ({ ...prev, date: null }))
-    }
-  }, [
-    bookingData.professionalId,
-    bookingData.serviceId,
-    fetchAvailableDates,
-    currentMonth,
-    currentYear
-  ])
-
-  // Cargar horarios disponibles cuando se selecciona una fecha
-  const fetchAvailableHours = React.useCallback(
-    async (professionalId: string | null, date: Date) => {
-      if (!date) return []
-
-      const dateStr = date.toISOString().split('T')[0]
-      const serviceId = bookingData.serviceId
-
-      if (!professionalId) {
-        try {
-          const res = await fetch(
-            `${apiUrl}/availability/hours?date=${dateStr}&serviceId=${serviceId}`
-          )
-
-          if (!res.ok) {
-            const errorText = await res.text()
-            console.error('Error en API:', errorText)
-            return []
-          }
-
-          const times = await res.json()
-          return times.map((time: string) => ({
-            time,
-            available: true
-          }))
-        } catch (error) {
-          console.error(
-            'Error al obtener horarios para cualquier profesional:',
-            error
-          )
-          return []
-        }
-      }
-
-      try {
-        const res = await fetch(
-          `${apiUrl}/availability/hours/${professionalId}?date=${dateStr}&serviceId=${serviceId}`
-        )
-
-        if (!res.ok) {
-          const errorText = await res.text()
-          console.error('Error en API:', errorText)
-          return []
-        }
-
-        const times = await res.json()
-
-        return times.map((time: string) => ({
-          time,
-          available: true
-        }))
-      } catch (error) {
-        console.error(
-          'Error al obtener horarios para profesional específico:',
-          error
-        )
-        return []
-      }
-    },
-    [bookingData.serviceId]
-  )
-
-  useEffect(() => {
-    if (bookingData.date) {
-      setIsLoadingSlots(true)
-      fetchAvailableHours(
-        bookingData.professionalId,
-        typeof bookingData.date === 'string'
-          ? new Date(bookingData.date)
-          : bookingData.date
-      )
-        .then((slots) => {
-          setAvailableSlots(slots)
-          setIsLoadingSlots(false)
-        })
-        .catch((error) => {
-          console.error('Error al cargar horarios:', error)
-          setAvailableSlots([])
-          setIsLoadingSlots(false)
-        })
-    }
-  }, [bookingData.date, bookingData.professionalId, fetchAvailableHours])
-
-  const fetchAvailableProfessional = async (date: Date, time: string) => {
-    const dateStr = date.toISOString().split('T')[0]
-    const res = await fetch(
-      `${apiUrl}/availability/professionals?date=${dateStr}&time=${time}`
-    )
-    return await res.json()
-  }
+  const { companyData } = useCompanyData(slug)
+  const {
+    availableDates,
+    availableSlots,
+    isLoadingSlots,
+    fetchAvailableProfessional
+  } = useAvailability(bookingData, currentMonth, currentYear)
 
   const handleServiceSelect = (serviceId: string) => {
     setBookingData((prev) => ({ ...prev, serviceId }))
@@ -340,11 +173,11 @@ function BookingContent({ slug }: { slug: string }) {
   }
 
   const getSelectedService = () =>
-    companyData?.services.find((s) => s.id === bookingData.serviceId)
+    companyData?.services.find((s: Service) => s.id === bookingData.serviceId)
   const getSelectedProfessional = () => {
     if (!bookingData.professionalId) return null
     return companyData?.professionals.find(
-      (p) => p.id === bookingData.professionalId
+      (p: Professional) => p.id === bookingData.professionalId
     )
   }
 
@@ -374,7 +207,6 @@ function BookingContent({ slug }: { slug: string }) {
     }
   }
 
-  // Define la función fuera del JSX
   const handleTimeContinue = async () => {
     if (bookingData.date && selectedTime) {
       const [hours, minutes] = selectedTime.split(':').map(Number)

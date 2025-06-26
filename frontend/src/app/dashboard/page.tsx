@@ -1,6 +1,5 @@
 'use client'
 
-// Importar todos los componentes de tabs
 import { ThemedCard } from '../components/themed/card'
 import { ThemeProvider } from '@/context/theme-context'
 import { useDashboard } from '@/context/dashboard-Context'
@@ -13,8 +12,6 @@ import { tabs } from '../mocks'
 
 function DashboardContent() {
   const { activeTab, setActiveTab } = useDashboard()
-
-  // Estados para configuración
 
   return (
     <main
@@ -72,15 +69,11 @@ function DashboardContent() {
             })}
           </div>
         </ThemedCard>
-
         <ThemedCard className="bg-white rounded-b-xl shadow-xl p-6">
           {/* Renderizar el tab activo */}
           {activeTab === 'reservas' && <BookingTab />}
-
           {activeTab === 'professionals' && <ProfessionalsTab />}
-
           {activeTab === 'services' && <ServicesTab />}
-
           {activeTab === 'schedules' && <SchedulesTab />}
           {activeTab === 'settings' && <SettingsTab />}
         </ThemedCard>

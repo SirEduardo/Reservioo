@@ -55,7 +55,7 @@ export function PersonalDataForm({
 
   return (
     <div className="max-w-3xl mx-auto px-4">
-      {/* Header elegante */}
+      {/* Header */}
       <div className="text-center mb-6">
         <div className="flex items-center justify-center mb-3">
           <CheckCircle
@@ -77,7 +77,7 @@ export function PersonalDataForm({
         </p>
       </div>
 
-      {/* Resumen elegante y legible */}
+      {/* Resumen de la reserva */}
       <div
         className="rounded-xl p-5 mb-6 shadow-sm"
         style={{
@@ -169,7 +169,7 @@ export function PersonalDataForm({
         </div>
       </div>
 
-      {/* Formulario con buen UX */}
+      {/* Formulario */}
       <form onSubmit={onSubmit} className="space-y-5">
         <div>
           <label
