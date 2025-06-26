@@ -129,7 +129,7 @@ export default function SettingsTab() {
                 className="block text-sm font-medium mb-2"
                 style={{ color: currentTheme.colors.text }}
               >
-                🔗 Slug del Negocio
+                🔗 Enlace del Negocio
               </label>
               <div className="flex flex-col sm:flex-row gap-2">
                 <ThemedInput
@@ -156,7 +156,7 @@ export default function SettingsTab() {
                   variant="outline"
                   disabled={loadingSlug}
                 >
-                  Guardar slug
+                  Guardar nuevo Enlace
                 </ThemedButton>
               </div>
               {slugError && (
