@@ -5,11 +5,13 @@ import {
   ReactNode,
   useContext,
   useEffect,
+  useReducer,
   useState
 } from 'react'
 import { useDashboard } from './dashboard-Context'
 import { Schedule, ScheduleProfessional } from '@/types'
 import { apiUrl } from '@/app/api/apiUrl'
+import { CrudReducer } from '@/app/reducer/crudReducer'
 
 type SchedulesContextProps = {
   addSchedule: (formData: {
@@ -51,26 +53,31 @@ export const ScheduleProvider = ({
     typeof companyIdProp === 'string' && companyIdProp
       ? companyIdProp
       : dashboard?.companyId
-  const [error, setError] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [schedules, setSchedules] = useState<Schedule[]>([])
+  const [state, dispatch] = useReducer(CrudReducer<Schedule>, {
+    items: [],
+    loading: false,
+    error: null
+  })
   const [scheduleProfessionals, setScheduleProfessionals] = useState<
     ScheduleProfessional[]
   >([])
 
   const fetchSchedules = async () => {
-    setLoading(true)
+    dispatch({ type: 'SET_LOADING', payload: true })
     try {
       if (!companyId) return
       const response = await fetch(`${apiUrl}/schedules/${companyId}`, {
         method: 'GET'
       })
       const data = await response.json()
-      setSchedules(data)
+      dispatch({ type: 'SET_ITEMS', payload: data })
     } catch {
-      setError('No se pudieron cargar los horarios')
+      dispatch({
+        type: 'SET_ERROR',
+        payload: 'No se pudieron cargar los horarios'
+      })
     } finally {
-      setLoading(false)
+      dispatch({ type: 'SET_LOADING', payload: false })
     }
   }
 
@@ -89,9 +96,9 @@ export const ScheduleProvider = ({
       })
       const data = await res.json()
 
-      setSchedules((schedules) => [...schedules, data])
+      dispatch({ type: 'ADD_ITEMS', payload: data })
     } catch {
-      setError('Error añadiendo horarios')
+      dispatch({ type: 'SET_ERROR', payload: 'Error añadiendo horarios' })
     }
   }
 
@@ -101,12 +108,9 @@ export const ScheduleProvider = ({
         method: 'DELETE'
       })
       await res.json()
-
-      setSchedules((prevSchedules) =>
-        prevSchedules.filter((schedule) => schedule.id !== scheduleId)
-      )
+      dispatch({ type: 'REMOVE_ITEMS', payload: scheduleId })
     } catch {
-      setError('Error deleting schedule')
+      dispatch({ type: 'SET_ERROR', payload: 'Error deleting schedule' })
     }
   }
   const fetchProfessionalSchedules = async () => {
@@ -159,7 +163,10 @@ export const ScheduleProvider = ({
         ])
       }
     } catch {
-      setError('Error toggling professional-schedule')
+      dispatch({
+        type: 'SET_ERROR',
+        payload: 'Error toggling professional-schedule'
+      })
     }
   }
 
@@ -174,6 +181,8 @@ export const ScheduleProvider = ({
     fetchSchedules()
     fetchProfessionalSchedules()
   }, [companyId])
+
+  const { items: schedules, loading, error } = state
 
   return (
     <ScheduleContext.Provider
