@@ -80,11 +80,11 @@ export default function ServicesTab() {
             <ThemedInput
               label="Duración (min)"
               type="number"
-              value={newService.duration}
+              value={newService.duration === 0 ? '' : newService.duration}
               onChange={(e) =>
                 setNewService({
                   ...newService,
-                  duration: Number(e.target.value)
+                  duration: e.target.value === '' ? 0 : Number(e.target.value)
                 })
               }
               min="15"
@@ -96,9 +96,12 @@ export default function ServicesTab() {
             <ThemedInput
               label="Precio (€)"
               type="number"
-              value={newService.price}
+              value={newService.price === 0 ? '' : newService.price}
               onChange={(e) =>
-                setNewService({ ...newService, price: Number(e.target.value) })
+                setNewService({
+                  ...newService,
+                  price: e.target.value === '' ? 0 : Number(e.target.value)
+                })
               }
               min="0"
               step="0.01"
