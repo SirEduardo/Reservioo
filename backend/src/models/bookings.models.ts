@@ -4,23 +4,33 @@ import { sendConfirmationBooking } from "../utils/sendConfirmation"
 export const getBookingDataBySlug = async (slug: string) => {
   const company = await prisma.company.findUnique({
     where: { slug },
-    include: {
-      services: true,
+    select: {
+      id: true,
+      businessName: true,
+      settings: {
+        select:{
+          appointmentDuration: true,
+        }
+      },
+      services: {
+        select: { id: true, name: true, duration: true, price: true }
+      },
       professionals: {
-        include: {
+        select: { 
+          id: true, 
+          name: true,
           professionalServices: {
-            include: {
-              service: true
+            select: {
+              service:{ select: { id: true, name: true }}
             }
           },
           schedules: {
-            include: {
-              schedule: true
+            select: {
+              schedule: { select: { dayOfWeek: true, startTime: true, endTime: true }}
             }
           }
         }
-      },
-      settings: true
+      }
     }
   })
 
@@ -34,6 +44,8 @@ export const createBookings = async(companyId: string, professionalId: string, s
   if (isNaN(dateObj.getTime())) {
     throw new Error("Fecha inválida")
   }
+  if (!/\S+@\S+\.\S+/.test(email)) throw new Error("Email inválido");
+  if (!/^\+?\d{5,15}$/.test(phone)) throw new Error("Teléfono inválido");
   const [company, professional, service] = await Promise.all([
     prisma.company.findUnique({ where: { id: companyId } }),
     prisma.professional.findUnique({ where: { id: professionalId } }),
@@ -55,10 +67,17 @@ export const createBookings = async(companyId: string, professionalId: string, s
         phone,
         date: dateObj,
       },
-      include: {
-        company: true,
-        professional: true,
-        service: true,
+      select: {
+        id: true,
+        date: true,
+        name: true,
+        email: true,
+        phone: true,
+        company:{
+          select: { id:true, businessName:true }
+        },
+        professional: { select: { id: true, name: true } },
+        service: { select: { id: true, name: true, price: true } }
       }
     })
     await sendConfirmationBooking({ booking, company: booking.company })

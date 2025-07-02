@@ -4,12 +4,13 @@ import {
   createContext,
   useContext,
   ReactNode,
-  useState,
-  useEffect
+  useEffect,
+  useReducer
 } from 'react'
 import { useDashboard } from './dashboard-Context'
 import { Professional } from '@/types'
 import { apiUrl } from '@/app/api/apiUrl'
+import { CrudReducer } from '@/app/reducer/crudReducer'
 
 type ProfessionalContextType = {
   professionals: Professional[]
@@ -45,23 +46,25 @@ export const ProfessionalsProvider = ({
     typeof companyIdProp === 'string' && companyIdProp
       ? companyIdProp
       : dashboard?.companyId
-  const [professionals, setProfessionals] = useState<Professional[]>([])
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [state, dispatch] = useReducer(CrudReducer<Professional>, {
+    items: [],
+    loading: false,
+    error: null
+  })
 
   const fetchProfessionals = async () => {
-    setLoading(true)
+    dispatch({ type: 'SET_LOADING', payload: true })
     try {
       if (!companyId) return
       const response = await fetch(`${apiUrl}/professionals/${companyId}`, {
         method: 'GET'
       })
       const data = await response.json()
-      setProfessionals(data)
+      dispatch({ type: 'SET_ITEMS', payload: data })
     } catch {
-      setError('Error al cargar profesionales')
+      dispatch({ type: 'SET_ERROR', payload: 'Error al cargar profesionales' })
     } finally {
-      setLoading(false)
+      dispatch({ type: 'SET_LOADING', payload: false })
     }
   }
   const handleAddProfessional = async (name: string) => {
@@ -75,9 +78,9 @@ export const ProfessionalsProvider = ({
         body: JSON.stringify({ name })
       })
       const data = await response.json()
-      setProfessionals((professionals) => [...professionals, data])
+      dispatch({ type: 'ADD_ITEMS', payload: data })
     } catch {
-      setError('Error adding professional')
+      dispatch({ type: 'SET_ERROR', payload: 'Error adding professional' })
     }
   }
   const handleDeleteProfessional = async (professionalId: string) => {
@@ -91,14 +94,9 @@ export const ProfessionalsProvider = ({
       }
 
       await response.json()
-
-      setProfessionals((prevProfessionals) =>
-        prevProfessionals.filter(
-          (professional) => professional.id !== professionalId
-        )
-      )
+      dispatch({ type: 'REMOVE_ITEMS', payload: professionalId })
     } catch {
-      setError('Error eliminando profesional')
+      dispatch({ type: 'SET_ERROR', payload: 'Error eliminando profesional' })
     }
   }
 
@@ -112,6 +110,8 @@ export const ProfessionalsProvider = ({
       return
     fetchProfessionals()
   }, [companyId])
+
+  const { loading, error, items: professionals } = state
 
   return (
     <ProfessionalsContext.Provider
