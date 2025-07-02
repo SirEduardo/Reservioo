@@ -34,7 +34,6 @@ export const fetchBookingData: Controller = async (req, res) => {
       company: {
         id: company.id,
         name: company.businessName,
-        type: company.businessType,
       },
       settings: company.settings,
       services,
