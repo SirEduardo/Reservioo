@@ -5,11 +5,13 @@ import {
   ReactNode,
   useContext,
   useEffect,
+  useReducer,
   useState
 } from 'react'
 import { useDashboard } from './dashboard-Context'
 import { apiUrl } from '@/app/api/apiUrl'
 import { Booking } from '@/types'
+import { CrudReducer } from '@/app/reducer/crudReducer'
 
 type BookingsContextProps = {
   bookings: Booking[]
@@ -42,20 +44,25 @@ export const BookingsProvider = ({
       ? companyIdProp
       : dashboard?.companyId
 
-  const [bookings, setBookings] = useState<Booking[]>([])
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [state, dispatch] = useReducer(CrudReducer<Booking>, {
+    items: [],
+    loading: false,
+    error: null
+  })
 
   const fetchBookings = async () => {
     if (!companyId) {
-      setError('No se ha identificado la empresa')
-      setLoading(false)
+      dispatch({
+        type: 'SET_ERROR',
+        payload: 'No se ha identificado la empresa'
+      })
+      dispatch({ type: 'SET_LOADING', payload: false })
       return
     }
 
     try {
-      setLoading(true)
-      setError(null)
+      dispatch({ type: 'SET_LOADING', payload: true })
+      dispatch({ type: 'SET_ERROR', payload: null })
 
       const response = await fetch(`${apiUrl}/bookings/${companyId}`, {
         method: 'GET',
@@ -76,16 +83,15 @@ export const BookingsProvider = ({
         date: booking.date ? new Date(booking.date) : null
       }))
 
-      setBookings(bookingsWithDates)
+      dispatch({ type: 'SET_ITEMS', payload: bookingsWithDates })
     } catch (err) {
       console.error('Error fetching bookings:', err)
-      setError(
-        err instanceof Error
-          ? err.message
-          : 'Error desconocido al cargar reservas'
-      )
+      dispatch({
+        type: 'SET_ERROR',
+        payload: 'Error desconocido al cargar reservas'
+      })
     } finally {
-      setLoading(false)
+      dispatch({ type: 'SET_LOADING', payload: false })
     }
   }
 
@@ -103,18 +109,18 @@ export const BookingsProvider = ({
       }
 
       // Remove from local state
-      setBookings((prev) => prev.filter((booking) => booking.id !== bookingId))
+      dispatch({ type: 'REMOVE_ITEMS', payload: bookingId })
     } catch (err) {
       console.error('Error deleting booking:', err)
-      setError(
-        err instanceof Error ? err.message : 'Error al eliminar la reserva'
-      )
+      dispatch({ type: 'SET_ERROR', payload: 'Error al eliminar la reserva' })
     }
   }
 
   useEffect(() => {
     fetchBookings()
   }, [companyId])
+
+  const { loading, error, items: bookings } = state
 
   return (
     <BookingsContext.Provider

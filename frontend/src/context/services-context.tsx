@@ -6,10 +6,12 @@ import {
   ReactNode,
   useContext,
   useEffect,
+  useReducer,
   useState
 } from 'react'
 import { useDashboard } from './dashboard-Context'
 import { apiUrl } from '@/app/api/apiUrl'
+import { CrudReducer } from '@/app/reducer/crudReducer'
 
 type ServiceContextType = {
   handleAddService: (data: {
@@ -52,26 +54,28 @@ export const ServiceProvider = ({
     typeof companyIdProp === 'string' && companyIdProp
       ? companyIdProp
       : dashboard?.companyId
-  const [services, setServices] = useState<Service[]>([])
+  const [state, dispatch] = useReducer(CrudReducer<Service>, {
+    items: [],
+    loading: false,
+    error: null
+  })
   const [professionalServices, setProfessionalServices] = useState<
     ProfessionalServices[]
   >([])
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
 
   const fetchServices = async () => {
-    setLoading(true)
+    dispatch({ type: 'SET_LOADING', payload: true })
     try {
       if (!companyId) return
       const response = await fetch(`${apiUrl}/services/${companyId}`, {
         method: 'GET'
       })
       const data = await response.json()
-      setServices(data)
+      dispatch({ type: 'SET_ITEMS', payload: data })
     } catch {
-      setError('Error al cargar servicios')
+      dispatch({ type: 'SET_ERROR', payload: 'Error al cargar servicios' })
     } finally {
-      setLoading(false)
+      dispatch({ type: 'SET_LOADING', payload: false })
     }
   }
 
@@ -89,9 +93,9 @@ export const ServiceProvider = ({
         body: JSON.stringify(serviceData)
       })
       const data = await res.json()
-      setServices((services) => [...services, data])
+      dispatch({ type: 'ADD_ITEMS', payload: data })
     } catch {
-      setError('Error adding services')
+      dispatch({ type: 'SET_ERROR', payload: 'Error adding services' })
     }
   }
 
@@ -104,12 +108,9 @@ export const ServiceProvider = ({
         throw new Error(`Failed to delete service: ${res.statusText}`)
       }
       await res.json()
-
-      setServices((prevService) =>
-        prevService.filter((service) => service.id !== serviceId)
-      )
+      dispatch({ type: 'REMOVE_ITEMS', payload: serviceId })
     } catch {
-      setError('Error deleting service:')
+      dispatch({ type: 'SET_ERROR', payload: 'Error deleting service:' })
     }
   }
 
@@ -163,7 +164,10 @@ export const ServiceProvider = ({
         ])
       }
     } catch {
-      setError('Error toggling professional-service')
+      dispatch({
+        type: 'SET_ERROR',
+        payload: 'Error toggling professional-service'
+      })
     }
   }
 
@@ -178,6 +182,8 @@ export const ServiceProvider = ({
     fetchServices()
     fetchProfessionalServices()
   }, [companyId])
+
+  const { loading, error, items: services } = state
 
   return (
     <ServicesContext.Provider
