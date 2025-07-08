@@ -3,14 +3,13 @@ import prisma from "../lib/prisma"
 
 export const getBusinessConfig = async (id: string) => {
     const business = await prisma.company.findUnique({
-        where: 
-        { id },
-        include: {
-            schedules: { select: { id: true}},
-            services: { select: { id: true}},
-            professionals: { select: { id: true}},
-            bookings: { select: { id: true}},
-            businessClosure: true
+        where: { id },
+        select: {
+            slug: true,
+                services: { select: { id: true}},
+                professionals: { select: { id: true}},
+                bookings: { select: { id: true, date: true}},
+                businessClosure: true  
         }
     })
     if (!business) throw new Error("Business data not found")
