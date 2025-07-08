@@ -44,22 +44,12 @@ export default function SettingsTab() {
     loadingClosure
   } = useSettings()
 
-  const [settings, setSettings] = useState<CompanySettings>({
+  const [localSettings, setLocalSettings] = useState<CompanySettings>({
     id: '1',
     companyId: 'company-1',
     appointmentDuration: 30
   })
-  const [localSettings, setLocalSettings] = useState(settings)
   const [copied, setCopied] = useState(false)
-
-  const handleUpdateSettings = (newSettings: CompanySettings) => {
-    setSettings(newSettings)
-  }
-
-  const handleSave = () => {
-    handleUpdateSettings(localSettings)
-    alert('¡Configuración guardada correctamente!')
-  }
 
   const copySlugToClipboard = () => {
     const fullUrl = `${apiSlug}/reservas/${businessSlug}`
