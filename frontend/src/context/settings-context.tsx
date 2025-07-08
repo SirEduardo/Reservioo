@@ -78,6 +78,8 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
       const res = await fetch(`${apiUrl}/business/${companyId}`)
       if (res.ok) {
         const data = await res.json()
+        console.log(data)
+
         dispatch({ type: 'SET_SLUG', payload: data.slug || '' })
         dispatch({ type: 'ADD_CLOSURE', payload: data.businessClosure })
         dispatch({ type: 'SET_COMPANY', payload: data })

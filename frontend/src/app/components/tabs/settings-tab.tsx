@@ -27,6 +27,7 @@ export default function SettingsTab() {
   const { currentTheme } = useTheme()
   const {
     businessSlug,
+    setBusinessSlug,
     company,
     closurePeriods,
     closureReason,
@@ -36,7 +37,6 @@ export default function SettingsTab() {
     handleAddClosure,
     handleSaveSlug,
     deleteClosure,
-    setBusinessSlug,
     handleCalendarDates,
     loadingSlug,
     slugError,
@@ -94,14 +94,6 @@ export default function SettingsTab() {
       new Date(b.date).getMonth() === new Date().getMonth() &&
       new Date(b.date).getFullYear() === new Date().getFullYear()
   ).length
-
-  const averagePrice =
-    company?.services && company?.services.length > 0
-      ? (
-          company.services.reduce((acc, s) => acc + s.price, 0) /
-          company.services.length
-        ).toFixed(2)
-      : '0.00'
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
@@ -517,33 +509,6 @@ export default function SettingsTab() {
                   style={{ color: currentTheme.colors.text }}
                 >
                   {monthBookings}
-                </span>
-              </div>
-
-              {/* Average Price */}
-              <div
-                className="flex items-center justify-between p-3 rounded-lg"
-                style={{
-                  backgroundColor: currentTheme.colors.background + '50'
-                }}
-              >
-                <div className="flex items-center gap-3">
-                  <DollarSign
-                    className="h-4 w-4"
-                    style={{ color: currentTheme.colors.success }}
-                  />
-                  <span
-                    className="text-sm"
-                    style={{ color: currentTheme.colors.text }}
-                  >
-                    Precio promedio
-                  </span>
-                </div>
-                <span
-                  className="font-semibold"
-                  style={{ color: currentTheme.colors.success }}
-                >
-                  €{averagePrice}
                 </span>
               </div>
             </div>
