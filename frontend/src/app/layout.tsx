@@ -6,6 +6,7 @@ import { ProfessionalsProvider } from '@/context/professionals-context'
 import { ScheduleProvider } from '@/context/schedules-context'
 import { ServiceProvider } from '@/context/services-context'
 import { BookingsProvider } from '@/context/bookings-context'
+import { SettingsProvider } from '@/context/settings-context'
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -36,7 +37,9 @@ export default function RootLayout({
           <ServiceProvider>
             <ProfessionalsProvider>
               <BookingsProvider>
-                <ScheduleProvider>{children}</ScheduleProvider>
+                <SettingsProvider>
+                  <ScheduleProvider>{children}</ScheduleProvider>
+                </SettingsProvider>
               </BookingsProvider>
             </ProfessionalsProvider>
           </ServiceProvider>
