@@ -35,14 +35,12 @@ export default function SchedulesTab() {
       alert('Selecciona al menos un día de la semana')
       return
     }
-
     selectedDays.forEach((dayOfWeek) => {
       addSchedule({
         ...newSchedule,
         dayOfWeek
       })
     })
-
     setNewSchedule({ startTime: '09:00', endTime: '14:00' })
     setSelectedDays([])
   }
@@ -267,7 +265,7 @@ export default function SchedulesTab() {
           ))}
       </div>
 
-      {/* Mensaje si no hay horarios */}
+      {/* Mensaje por si no hay horarios */}
       {schedules.length === 0 && (
         <ThemedCard className="p-8 text-center">
           <AlarmClock
