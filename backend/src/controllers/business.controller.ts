@@ -1,5 +1,5 @@
 import prisma from "../lib/prisma"
-import { getBusinessConfig, updateBusinessSlug } from "../models/business.models"
+import { addBusinessClosure, deleteBusinessClosure, getBusinessConfig, updateBusinessSlug } from "../models/business.models"
 import { Controller } from "../types"
 
 
@@ -42,5 +42,32 @@ export const getCompanyIdBySlug: Controller = async (req, res) => {
     res.json({ companyId: company.id, businessName: company.businessName });
 };
 
+export const addClosure: Controller = async (req, res) => {
+    try {
+        const { companyId } = req.params
+        const { startDate, endDate, reason } = req.body
+        if (!startDate || !endDate || !reason) throw new Error('Campos requeridos')
+        
+        const selectedStartDate = new Date(startDate)
+        const selectedEndDate = new Date(endDate)
 
+        selectedStartDate.setHours(0, 0, 0, 0)
+        selectedEndDate.setHours(23, 59, 59, 999)
+
+        const newClosure = await addBusinessClosure(companyId, selectedStartDate, selectedEndDate, reason)
+        return res.status(201).json(newClosure)
+    } catch (error) {
+        res.status(500).json({ message: "Internal server error", error })
+    }
+}
+
+export const deleteClosure: Controller = async (req, res) => {
+    try {
+        const { closureId } = req.params
+        const closure = await deleteBusinessClosure(closureId)
+        return res.status(200).json(closure)
+    } catch (error) {
+        res.status(500).json({ message: "Internal server error", error })
+    }
+}
 
