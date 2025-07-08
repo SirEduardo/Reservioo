@@ -13,6 +13,8 @@ export interface BusinessInfo {
   company: Company
   professionals: Professional[]
   services: Service[]
+  bookings: Booking[]
+  businessClosure: BusinessClosure[]
   settings: CompanySettings
 }
 export interface Professional {
@@ -56,6 +58,12 @@ export interface Booking {
     email: string
     date: string | Date | null
     phone?: string
+  }
+  export interface BusinessClosure {
+    id: string
+    startDate: Date
+    endDate: Date
+    reason: string
   }
   
 export interface CompanySettings {

@@ -25,11 +25,12 @@ model Company {
   slug         String        @unique
   createdAt    DateTime      @default(now())
 
-  professionals Professional[]
-  services      Service[]
-  schedules     Schedule[]
-  bookings      Booking[]
-  settings      Settings?
+  professionals   Professional[]
+  services        Service[]
+  schedules       Schedule[]
+  bookings        Booking[]
+  settings        Settings?
+  businessClosure BusinessClosure[]
 }
 
 model Schedule {
@@ -106,6 +107,21 @@ model Settings {
   companyId     String   @unique
   appointmentDuration Int // e.g., 30 minutes
   appointmentBuffer   Int // e.g., 10 minutes (optional)
+  minBookingTimeAhead Int?
+  maxBookingTimeAhead Int?
 
   company Company @relation(fields: [companyId], references: [id])
+}
+
+model BusinessClosure {
+  id            String   @id @default(uuid())
+  startDate     DateTime
+  endDate       DateTime
+  reason        String?
+  isHalfDay     Boolean?
+  companyId     String
+
+  company       Company  @relation(fields: [companyId], references: [id])
+
+  @@unique([companyId, startDate, endDate])
 }

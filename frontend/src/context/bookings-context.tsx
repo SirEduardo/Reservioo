@@ -75,13 +75,11 @@ export const BookingsProvider = ({
       }
 
       const data = await response.json()
-
       // Convert date strings to Date objects
       const bookingsWithDates = data.map((booking: Booking) => ({
         ...booking,
         date: booking.date ? new Date(booking.date) : null
       }))
-
       dispatch({ type: 'SET_ITEMS', payload: bookingsWithDates })
     } catch (err) {
       console.error('Error fetching bookings:', err)
